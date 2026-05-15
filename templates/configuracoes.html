@@ -308,35 +308,103 @@
     <!-- Segurança -->
     <div class="config-section" id="secSeguranca">
       <div class="config-section-title">Segurança</div>
-      <div class="config-section-desc">Altere a senha da sua conta</div>
+      <div class="config-section-desc">Proteja a conta, gere backups, restaure versões anteriores e limpe dados operacionais</div>
+
       <form action="{{ url_for('configuracoes.alterar_senha') }}" method="post">
-      <div class="card" style="padding:20px">
-        <div class="form-group">
-          <label class="form-label">Senha Atual</label>
-          <input type="password" name="senha_atual" class="form-control" placeholder="••••••••" required/>
+        <div class="card" style="padding:20px;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px">Alteração de senha</div>
+          <div class="form-group">
+            <label class="form-label">Senha Atual</label>
+            <input type="password" name="senha_atual" class="form-control" placeholder="••••••••" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nova Senha</label>
+            <input type="password" name="nova_senha" class="form-control" placeholder="••••••••" required minlength="6"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar Nova Senha</label>
+            <input type="password" name="confirmar_senha" class="form-control" placeholder="••••••••" required minlength="6"/>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Alterar Senha
+          </button>
         </div>
-        <div class="form-group">
-          <label class="form-label">Nova Senha</label>
-          <input type="password" name="nova_senha" class="form-control" placeholder="••••••••" required minlength="6"/>
+      </form>
+
+      {% if session.get('user_role') == 'admin' %}
+      <div class="card" style="padding:20px;margin-bottom:16px;border:1px solid var(--border)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px">
+          <div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">Backup do sistema</div>
+            <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5">Baixe uma cópia integral do banco SQLite. O sistema também cria um backup automático diário quando a tela de configurações é acessada.</div>
+          </div>
+          <form action="{{ url_for('configuracoes.baixar_backup') }}" method="post" style="margin:0">
+            <button type="submit" class="btn btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Gerar Backup
+            </button>
+          </form>
         </div>
-        <div class="form-group">
-          <label class="form-label">Confirmar Nova Senha</label>
-          <input type="password" name="confirmar_senha" class="form-control" placeholder="••••••••" required minlength="6"/>
-        </div>
-        <button type="submit" class="btn btn-primary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Alterar Senha
-        </button>
-        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
-          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Autenticação em Dois Fatores</div>
-          <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Adicione uma camada extra de segurança</div>
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <span style="font-size:13px;color:var(--text-muted)">2FA desativado</span>
-            <label class="switch"><input type="checkbox"/><span class="slider"></span></label>
+
+        {% if backup_error %}
+        <div style="padding:10px 12px;border-radius:var(--radius-sm);background:rgba(239,68,68,.12);color:#ef4444;font-size:12px;margin-bottom:12px">{{ backup_error }}</div>
+        {% endif %}
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px">
+          <div style="padding:12px;border-radius:var(--radius-sm);background:var(--bg-hover);border:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Backups recentes</div>
+            <div style="font-size:22px;font-weight:800;margin-top:4px">{{ backups|length }}</div>
+          </div>
+          <div style="padding:12px;border-radius:var(--radius-sm);background:var(--bg-hover);border:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Automático</div>
+            <div style="font-size:13px;font-weight:700;margin-top:8px">Diário</div>
           </div>
         </div>
+
+        {% if backups %}
+        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+          {% for item in backups %}
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:{% if not loop.last %}1px solid var(--border){% else %}0{% endif %}">
+            <div style="min-width:0">
+              <div style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.name }}</div>
+              <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px">{{ item.kind }} • {{ item.size_kb }} KB</div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);white-space:nowrap">{{ fmt_datetime(item.created_at) }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="font-size:12px;color:var(--text-muted);padding:10px 0">Nenhum backup encontrado ainda.</div>
+        {% endif %}
       </div>
-      </form>
+
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">Restaurar backup</div>
+        <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5;margin-bottom:14px">Envie um ZIP gerado pelo ServiceFlow. Antes de substituir o banco atual, o sistema cria um backup preventivo.</div>
+        <form action="{{ url_for('configuracoes.restaurar_backup') }}" method="post" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <input type="file" name="backup_file" accept=".zip" class="form-control" required style="max-width:360px"/>
+          <button type="submit" class="btn btn-secondary">Restaurar Backup</button>
+        </form>
+      </div>
+
+      <div class="card" style="padding:20px;border:1px solid rgba(239,68,68,.35);background:linear-gradient(135deg,rgba(239,68,68,.08),transparent)">
+        <div style="font-size:14px;font-weight:800;color:#ef4444;margin-bottom:4px">Resetar dados operacionais</div>
+        <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5;margin-bottom:14px">Remove clientes, serviços, tarefas, agenda, financeiro, mensagens, notificações e usuários extras. A conta admin atual é preservada e um backup é criado antes do reset.</div>
+        <form action="{{ url_for('configuracoes.resetar_dados') }}" method="post" onsubmit="return confirm('Tem certeza que deseja resetar os dados operacionais? Um backup será criado antes da limpeza.');">
+          <div class="form-group">
+            <label class="form-label">Digite RESETAR para confirmar</label>
+            <input type="text" name="confirmacao_reset" class="form-control" placeholder="RESETAR" autocomplete="off" required/>
+          </div>
+          <button type="submit" class="btn btn-danger">Resetar Dados</button>
+        </form>
+      </div>
+      {% else %}
+      <div class="card" style="padding:20px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Backup e reset</div>
+        <div style="font-size:12.5px;color:var(--text-muted)">Disponível apenas para administradores.</div>
+      </div>
+      {% endif %}
     </div>
 
     <!-- Integrações (somente admin) -->

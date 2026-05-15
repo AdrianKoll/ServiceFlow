@@ -25,16 +25,26 @@ ENV/
 *.crt
 
 # Banco/local runtime
-instance/
+instance/*
+!instance/.gitkeep
 *.sqlite
 *.sqlite3
 *.db
 *.db-journal
 
+# Backups do sistema
+backups/
+*.sql
+*.bak
+
 # Uploads locais gerados em execução
 static/uploads/*
 !static/uploads/.gitkeep
 !static/uploads/profiles/.gitkeep
+
+# Logs
+*.log
+logs/
 
 # IDE/Sistema
 .vscode/

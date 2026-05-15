@@ -1,13 +1,14 @@
 import re
 import os
 from uuid import uuid4
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file
 from werkzeug.utils import secure_filename
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import db, User
 from core.auth import get_current_user, login_required, role_required
+from services.backup_manager import create_backup, ensure_daily_backup, list_backups, reset_operational_data, restore_backup
 
 bp = Blueprint('configuracoes', __name__)
 
@@ -67,11 +68,22 @@ def configuracoes():
     integrations = [dict(item, connected=item['slug'] in connected) for item in INTEGRATION_CATALOG]
     company_settings = session.get('company_settings', {})
     notification_settings = session.get('notification_settings', {})
+    backup_error = None
+
+    try:
+        ensure_daily_backup()
+        backups = list_backups(limit=8)
+    except Exception as exc:
+        backups = []
+        backup_error = str(exc)
+
     return render_template(
         'configuracoes.html',
         integrations=integrations,
         company_settings=company_settings,
         notification_settings=notification_settings,
+        backups=backups,
+        backup_error=backup_error,
     )
 
 
@@ -152,6 +164,52 @@ def alterar_senha():
     user.password_hash = generate_password_hash(nova_senha)
     db.session.commit()
     flash('Senha alterada com sucesso!', 'success')
+    return _settings_redirect('seguranca')
+
+
+@bp.route('/configuracoes/seguranca/backup', methods=['POST'])
+@login_required
+@role_required('admin')
+def baixar_backup():
+    try:
+        backup_path = create_backup(reason='manual')
+        return send_file(backup_path, as_attachment=True, download_name=backup_path.name)
+    except Exception as exc:
+        flash(f'Não foi possível gerar o backup: {exc}', 'danger')
+        return _settings_redirect('seguranca')
+
+
+@bp.route('/configuracoes/seguranca/restaurar', methods=['POST'])
+@login_required
+@role_required('admin')
+def restaurar_backup():
+    arquivo = request.files.get('backup_file')
+    if not arquivo or not arquivo.filename:
+        flash('Selecione um arquivo ZIP de backup para restaurar.', 'warning')
+        return _settings_redirect('seguranca')
+    try:
+        restore_backup(arquivo, arquivo.filename)
+        flash('Backup restaurado com sucesso. Faça login novamente se algum dado de sessão mudar.', 'success')
+    except Exception as exc:
+        flash(f'Não foi possível restaurar o backup: {exc}', 'danger')
+    return _settings_redirect('seguranca')
+
+
+@bp.route('/configuracoes/seguranca/resetar-dados', methods=['POST'])
+@login_required
+@role_required('admin')
+def resetar_dados():
+    confirmacao = request.form.get('confirmacao_reset', '').strip().upper()
+    if confirmacao != 'RESETAR':
+        flash('Para resetar, digite RESETAR no campo de confirmação.', 'warning')
+        return _settings_redirect('seguranca')
+    try:
+        resumo = reset_operational_data(get_current_user())
+        total = sum(resumo.values())
+        flash(f'Reset concluído com segurança. {total} registros operacionais removidos. Um backup foi criado antes da limpeza.', 'success')
+    except Exception as exc:
+        db.session.rollback()
+        flash(f'Não foi possível resetar os dados: {exc}', 'danger')
     return _settings_redirect('seguranca')
 
 

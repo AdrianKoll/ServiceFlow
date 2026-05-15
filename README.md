@@ -245,3 +245,14 @@ Use `.env.example` apenas como modelo público.
 - Adicionar pipeline de lint/format para padronização de código.
 - Criar documentação de deploy específica para Render, Railway, PythonAnywhere ou VPS.
 - Preparar seed de dados demonstrativos para apresentação a clientes/recrutadores.
+
+## Backup, restauração e reset de dados
+
+A aba **Configurações > Segurança** possui recursos administrativos para manutenção do ambiente local SQLite:
+
+- **Gerar Backup**: cria e baixa um arquivo `.zip` com cópia integral do banco SQLite e metadados do backup.
+- **Backup automático diário**: ao acessar a tela de configurações, o sistema verifica se já existe backup automático nas últimas 24 horas; caso não exista, cria um novo em `instance/backups/automaticos`.
+- **Restaurar Backup**: permite enviar um `.zip` gerado pelo ServiceFlow. Antes da restauração, o sistema cria um backup preventivo em `instance/backups/restauracoes`.
+- **Resetar Dados**: remove dados operacionais como clientes, serviços, tarefas, agenda, financeiro, mensagens, notificações e usuários extras. A conta administrativa logada é preservada. Antes do reset, o sistema cria um backup preventivo.
+
+Essas ações ficam disponíveis apenas para usuários com perfil `admin`.
