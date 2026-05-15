@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Desempenho — ServiceFlow Pro{% endblock %}
+{% block content %}
+
+<div class="page-header pro-hero">
+  <div>
+    <h1 class="page-title">Desempenho da Equipe</h1>
+    <p class="page-subtitle">Acompanhe produtividade, atrasos e eficiência operacional dos colaboradores.</p>
+  </div>
+  <a href="{{ url_for('relatorios.relatorios') }}" class="btn btn-secondary">Ver relatórios</a>
+</div>
+
+<div class="kpi-grid kpi-grid-4">
+  <div class="card kpi-card"><div class="kpi-label">Conclusão geral</div><div class="kpi-value">{{ kpis.completion_rate }}%</div><div class="progress-bar"><div class="progress-fill" style="width:{{ kpis.completion_rate }}%"></div></div></div>
+  <div class="card kpi-card"><div class="kpi-label">Tarefas concluídas</div><div class="kpi-value">{{ kpis.task_completion_rate }}%</div><div class="kpi-change kpi-up">Fluxo de execução</div></div>
+  <div class="card kpi-card"><div class="kpi-label">Serviços atrasados</div><div class="kpi-value" style="color:var(--danger)">{{ kpis.overdue_services }}</div><div class="kpi-change kpi-down">Requer atenção</div></div>
+  <div class="card kpi-card"><div class="kpi-label">Tarefas atrasadas</div><div class="kpi-value" style="color:var(--warning)">{{ kpis.overdue_tasks }}</div><div class="kpi-change">Priorize no Kanban</div></div>
+</div>
+
+<div class="performance-grid">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Ranking de eficiência</span></div>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>Colaborador</th><th>Perfil</th><th>Tarefas</th><th>Serviços</th><th>Risco</th><th>Score</th></tr></thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <td><div class="person-cell"><div class="team-avatar">{{ row.user.name[:2].upper() }}</div><div><strong>{{ row.user.name }}</strong><div class="td-muted">{{ row.user.email }}</div></div></div></td>
+            <td><span class="badge badge-active">{{ role_pt.get(row.user.role, row.user.role) }}</span></td>
+            <td>{{ row.task_done }}/{{ row.task_total }} concluídas<br><span class="td-muted">{{ row.task_overdue }} atrasadas</span></td>
+            <td>{{ row.services_completed }}/{{ row.services_total }} concluídos</td>
+            <td><span class="badge {% if row.risk == 'high' %}badge-overdue{% elif row.risk == 'medium' %}badge-pending{% else %}badge-active{% endif %}">{% if row.risk == 'high' %}Alto{% elif row.risk == 'medium' %}Médio{% else %}Baixo{% endif %}</span></td>
+            <td><strong>{{ row.score }}%</strong><div class="progress-bar"><div class="progress-fill" style="width:{{ row.score }}%"></div></div></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="empty-state">Nenhum colaborador cadastrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Tendência operacional</span></div>
+    <div class="card-body"><div style="position:relative;height:250px"><canvas id="teamTrendChart"></canvas></div></div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="card-header"><span class="card-title">Leitura gerencial</span></div>
+  <div class="decision-grid card-body">
+    <div class="decision-card"><strong>1. Priorizar atrasos</strong><span>Comece pelos colaboradores com maior número de tarefas atrasadas.</span></div>
+    <div class="decision-card"><strong>2. Balancear carga</strong><span>Redistribua serviços quando um técnico concentrar muitas pendências.</span></div>
+    <div class="decision-card"><strong>3. Medir constância</strong><span>Use o score como indicador de acompanhamento, não como punição.</span></div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+ const cs=getComputedStyle(document.documentElement), get=v=>cs.getPropertyValue(v).trim();
+ const primary=get('--primary'), success=get('--success'), border=get('--border'), muted=get('--text-muted'), text=get('--text'), bg=get('--bg-card');
+ const ctx=document.getElementById('teamTrendChart');
+ if(ctx) new Chart(ctx,{type:'line',data:{labels:{{ chart_labels|safe }},datasets:[{label:'Criados',data:{{ chart_created|safe }},borderColor:primary,backgroundColor:primary+'22',fill:true,tension:.4},{label:'Concluídos',data:{{ chart_completed|safe }},borderColor:success,backgroundColor:success+'11',fill:false,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:muted}},tooltip:{backgroundColor:bg,borderColor:border,borderWidth:1,titleColor:text,bodyColor:muted}},scales:{x:{grid:{display:false},ticks:{color:muted}},y:{beginAtZero:true,grid:{color:border},ticks:{color:muted,precision:0}}}}});
+})();
+</script>
+{% endblock %}

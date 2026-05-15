@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Equipe — ServiceFlow Pro{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Equipe</div>
+    <div class="page-subtitle">{{ users|length }} usuário(s) cadastrado(s)</div>
+  </div>
+  <button class="btn btn-primary" data-modal-open="modalNovoUsuario">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Novo Usuário
+  </button>
+</div>
+
+<form method="get" class="filter-bar">
+  <div class="filter-tabs">
+    <a href="{{ url_for('equipe.equipe') }}" class="filter-tab {% if not status_f %}active{% endif %}">Todos</a>
+    <a href="?status=active" class="filter-tab {% if status_f == 'active' %}active{% endif %}">Ativos</a>
+    <a href="?status=inactive" class="filter-tab {% if status_f == 'inactive' %}active{% endif %}">Inativos</a>
+  </div>
+  <div class="search-wrap" style="margin-left:auto">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" name="search" value="{{ search_f }}" placeholder="Buscar usuário..." class="search-input"/>
+    {% if status_f %}<input type="hidden" name="status" value="{{ status_f }}"/>{% endif %}
+  </div>
+</form>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+  {% for u in users %}
+  <div class="card" style="padding:20px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--primary-alpha);border:1px solid rgba(99,102,241,0.3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--primary);flex-shrink:0">
+        {{ u.name[:2].upper() }}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.name }}</div>
+        <div style="font-size:12px;color:var(--text-muted)">{{ role_pt.get(u.role, u.role) }}</div>
+        {% if u.department %}<div style="font-size:11px;color:var(--text-subtle)">{{ u.department }}</div>{% endif %}
+      </div>
+      <span class="badge badge-{{ u.status }}">{{ status_pt.get(u.status, u.status) }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--text-muted);margin-bottom:14px">
+      {% if u.email %}
+      <div style="display:flex;align-items:center;gap:6px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        {{ u.email }}
+      </div>
+      {% endif %}
+      {% if u.phone %}
+      <div style="display:flex;align-items:center;gap:6px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.67a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .84h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        {{ u.phone }}
+      </div>
+      {% endif %}
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-secondary btn-sm" style="flex:1;justify-content:center"
+        data-edit-modal="modalEditUsuario"
+        data-action-url="{{ url_for('equipe.equipe_editar', id=u.id) }}"
+        data-name="{{ u.name }}"
+        data-email="{{ u.email or '' }}"
+        data-phone="{{ u.phone or '' }}"
+        data-role="{{ u.role }}"
+        data-status="{{ u.status }}"
+        data-department="{{ u.department or '' }}">
+        Editar
+      </button>
+      <form id="del-usr-{{ u.id }}" action="{{ url_for('equipe.equipe_excluir', id=u.id) }}" method="post" style="display:inline">
+        <button type="button" class="btn btn-danger btn-sm" data-delete-form="del-usr-{{ u.id }}">Remover</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px">Nenhum usuário encontrado</div>
+  {% endfor %}
+</div>
+
+<!-- Modal Novo -->
+<div class="modal-backdrop" id="modalNovoUsuario">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Novo Usuário</span>
+      <button class="modal-close" data-modal-close="modalNovoUsuario">✕</button>
+    </div>
+    <form action="{{ url_for('equipe.equipe_novo') }}" method="post">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome *</label>
+          <input type="text" name="name" class="form-control" required placeholder="Nome completo"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" name="email" class="form-control" required placeholder="email@empresa.com"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha inicial *</label>
+        <input type="password" name="password" class="form-control" required minlength="6" placeholder="Senha para primeiro acesso"/>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Este usuário entrará pela tela inicial usando este e-mail e senha.</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input type="text" name="phone" class="form-control" placeholder="(11) 99999-9999"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Departamento</label>
+          <input type="text" name="department" class="form-control" placeholder="TI, Operações..."/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cargo</label>
+          <select name="role" class="form-control">
+            <option value="technician">Técnico</option>
+            <option value="manager">Gerente</option>
+            <option value="sales">Vendas</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="modalNovoUsuario">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Criar usuário</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal-backdrop" id="modalEditUsuario">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Editar Usuário</span>
+      <button class="modal-close" data-modal-close="modalEditUsuario">✕</button>
+    </div>
+    <form action="" method="post">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome *</label>
+          <input type="text" name="name" class="form-control" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" name="email" class="form-control" required/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nova senha</label>
+        <input type="password" name="password" class="form-control" minlength="6" placeholder="Preencha somente se quiser alterar"/>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Deixe em branco para manter a senha atual.</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input type="text" name="phone" class="form-control"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Departamento</label>
+          <input type="text" name="department" class="form-control"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cargo</label>
+          <select name="role" class="form-control">
+            <option value="technician">Técnico</option>
+            <option value="manager">Gerente</option>
+            <option value="sales">Vendas</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="modalEditUsuario">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

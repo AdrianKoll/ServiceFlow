@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% block title %}Financeiro — ServiceFlow Pro{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Fluxo de Caixa</div>
+    <div class="page-subtitle">Acompanhe o fluxo financeiro da empresa</div>
+  </div>
+  <button class="btn btn-primary" data-modal-open="modalNovaTransacao">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Nova Transação
+  </button>
+</div>
+
+<!-- 4 KPI Cards -->
+<div class="kpi-grid kpi-grid-4">
+  <div class="card kpi-card">
+    <div class="kpi-label">Total Entradas
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+    </div>
+    <div class="kpi-value" style="color:var(--success);font-size:20px">{{ fmt_brl(income) }}</div>
+    <div class="kpi-change kpi-up">↑ Receitas</div>
+  </div>
+  <div class="card kpi-card">
+    <div class="kpi-label">Total Saídas
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+    </div>
+    <div class="kpi-value" style="color:var(--danger);font-size:20px">{{ fmt_brl(expense) }}</div>
+    <div class="kpi-change kpi-down">↓ Despesas</div>
+  </div>
+  <div class="card kpi-card">
+    <div class="kpi-label">Saldo Líquido
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+    </div>
+    <div class="kpi-value" style="color:var(--info);font-size:20px;{% if balance < 0 %}color:var(--danger){% endif %}">{{ fmt_brl(balance) }}</div>
+    <div class="kpi-change {% if balance >= 0 %}kpi-up{% else %}kpi-down{% endif %}">{% if balance >= 0 %}↑{% else %}↓{% endif %} Balanço</div>
+  </div>
+  <div class="card kpi-card">
+    <div class="kpi-label">Pendentes
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div class="kpi-value" style="color:var(--primary)">{{ pending_count }}</div>
+    <div class="kpi-change" style="color:var(--text-muted)">↑ Transações</div>
+  </div>
+</div>
+
+<!-- Area Chart: Evolução do Fluxo de Caixa -->
+<div class="card" style="margin-bottom:16px">
+  <div class="card-header">
+    <span class="card-title">Evolução do Fluxo de Caixa</span>
+    <div style="display:flex;gap:16px;align-items:center;font-size:12px">
+      <span style="display:flex;align-items:center;gap:5px">
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--success);display:inline-block"></span>
+        Entradas
+      </span>
+      <span style="display:flex;align-items:center;gap:5px">
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--danger);display:inline-block"></span>
+        Saídas
+      </span>
+    </div>
+  </div>
+  <div class="card-body" style="padding:12px 16px 16px">
+    <div style="position:relative;height:240px">
+      <canvas id="cashFlowChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Transactions Table -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Transações Recentes</span>
+    <div class="filter-tabs-inline">
+      <a href="{{ url_for('financeiro.financeiro') }}" class="filter-tab {% if not type_f %}active{% endif %}">Todas</a>
+      <a href="?type=income" class="filter-tab {% if type_f == 'income' %}active{% endif %}">Receitas</a>
+      <a href="?type=expense" class="filter-tab {% if type_f == 'expense' %}active{% endif %}">Despesas</a>
+    </div>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Tipo</th>
+          <th class="hide-sm">Categoria</th>
+          <th class="hide-sm">Cliente</th>
+          <th>Valor</th>
+          <th>Status</th>
+          <th class="hide-sm">Vencimento</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t, client_name, service_title in transactions %}
+        <tr>
+          <td>
+            <div style="font-weight:500">{{ t.description }}</div>
+            {% if service_title %}<div style="font-size:11px;color:var(--text-muted)">{{ service_title }}</div>{% endif %}
+          </td>
+          <td>
+            <span style="font-size:12px;font-weight:500;color:{% if t.type == 'income' %}var(--success){% else %}var(--danger){% endif %}">
+              {% if t.type == 'income' %}↑ Receita{% else %}↓ Despesa{% endif %}
+            </span>
+          </td>
+          <td class="td-muted hide-sm">{{ t.category or '—' }}</td>
+          <td class="td-muted hide-sm">{{ client_name or '—' }}</td>
+          <td style="font-weight:600;color:{% if t.type == 'income' %}var(--success){% else %}var(--danger){% endif %}">
+            {{ fmt_brl(t.amount) }}
+          </td>
+          <td><span class="badge badge-{{ t.status }}">{{ status_pt.get(t.status, t.status) }}</span></td>
+          <td class="td-muted hide-sm">{{ fmt_date(t.due_date) }}</td>
+          <td>
+            <form id="del-txn-{{ t.id }}" action="{{ url_for('financeiro.transacao_excluir', id=t.id) }}" method="post" style="display:inline">
+              <button type="button" class="btn btn-ghost btn-icon" style="color:var(--danger)" data-delete-form="del-txn-{{ t.id }}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:32px">Nenhuma transação encontrada</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Nova Transação -->
+<div class="modal-backdrop" id="modalNovaTransacao">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nova Transação</span>
+      <button class="modal-close" data-modal-close="modalNovaTransacao">✕</button>
+    </div>
+    <form action="{{ url_for('financeiro.transacao_nova') }}" method="post">
+      <div class="form-group">
+        <label class="form-label">Descrição *</label>
+        <input type="text" name="description" class="form-control" required placeholder="Descrição da transação"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tipo *</label>
+          <select name="type" class="form-control" required>
+            <option value="income">Receita</option>
+            <option value="expense">Despesa</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor *</label>
+          <input type="number" name="amount" class="form-control" required step="0.01" min="0.01" placeholder="0,00"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Categoria</label>
+          <input type="text" name="category" class="form-control" placeholder="Manutenção, Serviço..."/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="pending">Pendente</option>
+            <option value="paid">Pago</option>
+            <option value="overdue">Atrasado</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cliente</label>
+          <select name="client_id" class="form-control">
+            <option value="">— Opcional —</option>
+            {% for c in clients %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Serviço</label>
+          <select name="service_id" class="form-control">
+            <option value="">— Opcional —</option>
+            {% for s in services %}<option value="{{ s.id }}">{{ s.title }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Vencimento</label>
+        <input type="date" name="due_date" class="form-control"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="modalNovaTransacao">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar Transação</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  const cs     = getComputedStyle(document.documentElement);
+  const get    = (v) => cs.getPropertyValue(v).trim();
+  const success = get('--success');
+  const danger  = get('--danger');
+  const border  = get('--border');
+  const muted   = get('--text-muted');
+  const text    = get('--text');
+  const bgCard  = get('--bg-card');
+
+  Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
+  Chart.defaults.font.size   = 11.5;
+
+  const labels   = ['01 Mai','05 Mai','10 Mai','15 Mai','20 Mai','25 Mai','31 Mai'];
+  const entradas = [8200, 12400, 9800, 15600, 11200, 18400, 14750];
+  const saidas   = [3400, 5200, 4100, 6800, 3900, 7200, 5100];
+
+  const ctx = document.getElementById('cashFlowChart');
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Entradas',
+          data: entradas,
+          borderColor: success,
+          backgroundColor: success + '33',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+          pointRadius: 2,
+        },
+        {
+          label: 'Saídas',
+          data: saidas,
+          borderColor: danger,
+          backgroundColor: danger + '22',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+          pointRadius: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      animation: { duration: 600 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: bgCard,
+          borderColor: border,
+          borderWidth: 1,
+          titleColor: text,
+          bodyColor: muted,
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            label: (item) => `  ${item.dataset.label}: R$ ${item.parsed.y.toLocaleString('pt-BR')}`,
+          },
+        },
+      },
+      scales: {
+        x: { grid: { display: false }, border: { display: false }, ticks: { color: muted } },
+        y: {
+          beginAtZero: true,
+          grid: { color: border },
+          border: { display: false },
+          ticks: {
+            color: muted,
+            callback: (v) => `${(v/1000).toFixed(0)}k`,
+          },
+        },
+      },
+    },
+  });
+})();
+</script>
+{% endblock %}

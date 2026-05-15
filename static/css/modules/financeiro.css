@@ -1,0 +1,69 @@
+/* ══════════════════════════════════════════
+   MÓDULO: Financeiro
+   Página: /financeiro
+   Contém: grade KPI 4 colunas, gráfico de área,
+   tabela de transações e filtros inline.
+   ══════════════════════════════════════════ */
+
+/* ── Sobreposição do kpi-grid para 4 colunas ── */
+.finance-kpi-grid {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+/* ──────────────────────────────────────────
+
+   Mantém compatibilidade com classes antigas
+
+   ────────────────────────────────────────── */
+.finance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.finance-card {
+  text-align: center;
+  padding: 20px;
+}
+.finance-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.finance-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+.income {
+  color: var(--success);
+}
+.expense {
+  color: var(--danger);
+}
+.balance {
+  color: var(--primary);
+}
+
+/* ── Filtros inline no card-header ── */
+.filter-tabs-inline {
+  display: flex;
+  gap: 4px;
+}
+.filter-tabs-inline .filter-tab {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.filter-tabs-inline .filter-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.filter-tabs-inline .filter-tab.active {
+  background: var(--primary);
+  color: var(--primary-fg);
+}

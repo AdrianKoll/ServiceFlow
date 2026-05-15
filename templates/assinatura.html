@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}Assinatura - ServiceFlow{% endblock %}
+{% block content %}
+<div class="page-header saas-page-header billing-header-pro">
+  <div>
+    <span class="section-kicker">Assinatura SaaS</span>
+    <h1>Plano e cobrança</h1>
+    <p>Controle o plano da empresa, veja limites de uso e altere a assinatura demonstrativa sem sair do painel.</p>
+  </div>
+  <div class="billing-status-pill {{ tenant.billing_status if tenant else 'trial' }}">
+    {{ tenant.billing_status|replace('_',' ')|title if tenant else 'Trial' }}
+  </div>
+</div>
+
+{% if blocked %}
+<div class="alert-card warning" style="margin-bottom:16px">
+  <strong>Recurso bloqueado no plano atual.</strong>
+  <span>O recurso <b>{{ blocked }}</b> faz parte do plano Pro. Faça upgrade para liberar sem alterar seus dados.</span>
+</div>
+{% endif %}
+
+<section class="card billing-overview-card">
+  <div class="billing-overview-main">
+    <div class="billing-plan-icon">{{ '★' if current_plan['slug'] == 'pro' else '✓' }}</div>
+    <div>
+      <span class="pricing-tag">Plano atual</span>
+      <h2>{{ current_plan['name'] }}</h2>
+      <p>{{ current_plan['description'] }}</p>
+      <div class="subscription-price">{{ current_plan['price_label'] }} <span>/ ambiente demonstrativo</span></div>
+    </div>
+  </div>
+  <div class="billing-overview-side">
+    <div><small>Empresa</small><strong>{{ tenant.name if tenant else 'Empresa demo' }}</strong></div>
+    <div><small>Usuários</small><strong>{{ users_count }}</strong></div>
+    <div><small>Trial</small><strong>{{ trial_days }} dias</strong></div>
+    <div><small>Renovação</small><strong>{{ fmt_date(tenant.next_invoice_at) if tenant and tenant.next_invoice_at else 'a definir' }}</strong></div>
+  </div>
+</section>
+
+<section class="billing-section-grid">
+  <div class="card billing-card-large">
+    <div class="card-header">
+      <span class="card-title">Uso do plano</span>
+      <span class="text-muted-small">Limites atuais da empresa</span>
+    </div>
+    <div class="billing-usage-list">
+      {% for item in usage_summary %}
+      <div class="usage-row {% if item.pct >= 85 %}warning{% endif %}">
+        <div class="usage-row-top"><strong>{{ item.label }}</strong><span>{{ item.used }}/{{ item.limit }}</span></div>
+        <div class="sidebar-plan-meter"><span style="width:{{ item.pct }}%"></span></div>
+        <small>{{ item.pct }}% usado</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card billing-card-large">
+    <div class="card-header">
+      <span class="card-title">Fluxo correto do SaaS</span>
+      <span class="text-muted-small">Empresa → Admin → Equipe</span>
+    </div>
+    <div class="billing-flow-list">
+      <div><b>1</b><span>Cliente escolhe o plano e cria a conta administradora.</span></div>
+      <div><b>2</b><span>O administrador entra no painel da própria empresa.</span></div>
+      <div><b>3</b><span>Dentro de Equipe, ele cria técnicos, gerentes e atendentes.</span></div>
+    </div>
+    <a href="{{ url_for('equipe.equipe') }}" class="btn btn-secondary" style="width:100%;justify-content:center;margin-top:14px">Gerenciar equipe</a>
+  </div>
+</section>
+
+<section class="billing-plans-wrapper">
+  <div class="section-title-row">
+    <div>
+      <span class="pricing-tag">Planos disponíveis</span>
+      <h2>Escolha o melhor plano para a empresa</h2>
+    </div>
+    <span class="plan-chip">Básico x Pro</span>
+  </div>
+
+  <div class="pricing-grid internal-pricing billing-pricing-grid">
+    {% for slug, plan in plans.items() %}
+    <div class="pricing-card {% if current_plan['slug'] == slug %}active{% endif %} {% if plan['recommended'] %}highlight{% endif %}">
+      {% if plan['recommended'] %}<div class="recommended-ribbon">Recomendado</div>{% endif %}
+      <div class="pricing-tag">{{ plan['tag'] }}</div>
+      <h2>{{ plan['name'] }}</h2>
+      <p class="pricing-desc">{{ plan['description'] }}</p>
+      <div class="pricing-price">{{ plan['price_label'] }}</div>
+      <ul class="pricing-features">
+        {% for feature in plan['feature_list'] %}<li>✓ {{ feature }}</li>{% endfor %}
+        {% for locked in plan['locked_list'] %}<li class="muted">✕ {{ locked }}</li>{% endfor %}
+      </ul>
+      {% if current_user.role == 'admin' %}
+      <form action="{{ url_for('assinatura.alterar_plano') }}" method="post" class="upgrade-form">
+        <input type="hidden" name="plan" value="{{ slug }}">
+        <div class="form-row">
+          <div class="form-group"><label>Pagamento demo</label><select name="payment_method" class="form-control">{% for method in payment_methods %}<option value="{{ method['slug'] }}">{{ method['icon'] }} {{ method['name'] }}</option>{% endfor %}</select></div>
+          <div class="form-group"><label>Ciclo</label><select name="billing_cycle" class="form-control"><option value="monthly">Mensal</option><option value="yearly">Anual demo</option></select></div>
+        </div>
+        <button class="btn {% if slug == 'pro' %}btn-primary{% else %}btn-secondary{% endif %}" type="submit">
+          {% if current_plan['slug'] == slug %}Manter plano{% elif slug == 'pro' %}Fazer upgrade para Pro{% else %}Mudar para Básico{% endif %}
+        </button>
+      </form>
+      {% else %}
+      <div class="plan-note">Somente administradores podem alterar assinatura.</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card feature-matrix-card billing-matrix-card">
+  <div class="card-header"><span class="card-title">Comparativo de recursos</span><span class="text-muted-small">O que libera em cada plano</span></div>
+  <div class="table-container">
+    <table>
+      <thead><tr><th>Recurso</th><th>Básico</th><th>Pro</th></tr></thead>
+      <tbody>
+        {% for row in feature_matrix %}
+        <tr><td>{{ row.label }}</td><td>{% if row.basic %}<span class="badge badge-active">Liberado</span>{% else %}<span class="badge badge-todo">Bloqueado</span>{% endif %}</td><td><span class="badge badge-active">Liberado</span></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card billing-payment-card">
+  <div class="billing-payment-info">
+    <h3>Pagamentos em produção</h3>
+    <p class="muted">
+      Nesta versão, pagamentos são demonstrativos. Em produção, a alteração de plano deve acontecer somente após confirmação por webhook do gateway.
+    </p>
+  </div>
+  <div class="payment-methods-row">
+    {% for method in payment_methods %}
+    <div class="payment-pill"><span>{{ method['icon'] }}</span><strong>{{ method['name'] }}</strong><small>{{ method['desc'] }}</small></div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

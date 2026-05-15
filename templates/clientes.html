@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}Clientes — ServiceFlow Pro{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Clientes</div>
+    <div class="page-subtitle">{{ clients|length }} cliente(s) cadastrado(s)</div>
+  </div>
+  <button class="btn btn-primary" data-modal-open="modalNovoCliente">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Novo Cliente
+  </button>
+</div>
+
+<form method="get" class="filter-bar">
+  <div class="filter-tabs">
+    <a href="{{ url_for('clientes.clientes') }}" class="filter-tab {% if not status_f %}active{% endif %}">Todos</a>
+    <a href="?status=active" class="filter-tab {% if status_f == 'active' %}active{% endif %}">Ativos</a>
+    <a href="?status=inactive" class="filter-tab {% if status_f == 'inactive' %}active{% endif %}">Inativos</a>
+    <a href="?status=prospect" class="filter-tab {% if status_f == 'prospect' %}active{% endif %}">Prospects</a>
+  </div>
+  <div class="search-wrap" style="margin-left:auto">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" name="search" value="{{ search_f }}" placeholder="Buscar cliente..." class="search-input"/>
+    {% if status_f %}<input type="hidden" name="status" value="{{ status_f }}"/>{% endif %}
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th class="hide-sm">Empresa</th>
+          <th class="hide-sm">Email</th>
+          <th class="hide-sm">Telefone</th>
+          <th class="hide-sm">Cidade</th>
+          <th>Status</th>
+          <th class="hide-sm">Cadastro</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in clients %}
+        <tr>
+          <td><div style="font-weight:500">{{ c.name }}</div></td>
+          <td class="td-muted hide-sm">{{ c.company or '—' }}</td>
+          <td class="td-muted hide-sm">{{ c.email or '—' }}</td>
+          <td class="td-muted hide-sm">{{ c.phone or '—' }}</td>
+          <td class="td-muted hide-sm">{{ c.city or '—' }}{% if c.state %}/{{ c.state }}{% endif %}</td>
+          <td><span class="badge badge-{{ c.status }}">{{ status_pt.get(c.status, c.status) }}</span></td>
+          <td class="td-muted hide-sm">{{ fmt_date(c.created_at) }}</td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-ghost btn-icon"
+                data-edit-modal="modalEditCliente"
+                data-action-url="{{ url_for('clientes.cliente_editar', id=c.id) }}"
+                data-name="{{ c.name }}"
+                data-email="{{ c.email or '' }}"
+                data-phone="{{ c.phone or '' }}"
+                data-company="{{ c.company or '' }}"
+                data-city="{{ c.city or '' }}"
+                data-state="{{ c.state or '' }}"
+                data-status="{{ c.status }}"
+                data-notes="{{ c.notes or '' }}"
+                title="Editar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <form id="del-cli-{{ c.id }}" action="{{ url_for('clientes.cliente_excluir', id=c.id) }}" method="post" style="display:inline">
+                <button type="button" class="btn btn-ghost btn-icon" style="color:var(--danger)" data-delete-form="del-cli-{{ c.id }}" title="Excluir">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:32px">Nenhum cliente encontrado</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Novo -->
+<div class="modal-backdrop" id="modalNovoCliente">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Novo Cliente</span>
+      <button class="modal-close" data-modal-close="modalNovoCliente">✕</button>
+    </div>
+    <form action="{{ url_for('clientes.cliente_novo') }}" method="post">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome *</label>
+          <input type="text" name="name" class="form-control" required placeholder="Nome completo"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Empresa</label>
+          <input type="text" name="company" class="form-control" placeholder="Razão social"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" placeholder="email@exemplo.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input type="text" name="phone" class="form-control" placeholder="(11) 99999-9999"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cidade</label>
+          <input type="text" name="city" class="form-control" placeholder="São Paulo"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <select name="state" class="form-control">
+            <option value="">—</option>
+            {% for uf in ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] %}
+            <option value="{{ uf }}">{{ uf }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+            <option value="prospect">Prospect</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea name="notes" class="form-control" placeholder="Notas sobre o cliente..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="modalNovoCliente">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Criar Cliente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal-backdrop" id="modalEditCliente">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Editar Cliente</span>
+      <button class="modal-close" data-modal-close="modalEditCliente">✕</button>
+    </div>
+    <form action="" method="post">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome *</label>
+          <input type="text" name="name" class="form-control" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Empresa</label>
+          <input type="text" name="company" class="form-control"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input type="text" name="phone" class="form-control"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cidade</label>
+          <input type="text" name="city" class="form-control"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <select name="state" class="form-control">
+            <option value="">—</option>
+            {% for uf in ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] %}
+            <option value="{{ uf }}">{{ uf }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+            <option value="prospect">Prospect</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea name="notes" class="form-control"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="modalEditCliente">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

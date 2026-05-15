@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Agenda — ServiceFlow Pro{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+  var chips = document.querySelectorAll('[data-event-filter]');
+  var events = document.querySelectorAll('[data-event-type]');
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      chips.forEach(function(c){ c.classList.remove('active'); });
+      chip.classList.add('active');
+      var type = chip.dataset.eventFilter;
+      events.forEach(function(item){
+        item.style.display = (type === 'all' || item.dataset.eventType === type) ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Agenda</div>
+    <div class="page-subtitle">{{ events|length }} evento(s) agendado(s)</div>
+  </div>
+  <button class="btn btn-primary" data-modal-open="modalNovoEvento">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Novo Evento
+  </button>
+</div>
+
+<div class="agenda-layout">
+  <!-- Event List -->
+  <div class="card">
+    <div class="card-header" style="align-items:flex-start;gap:10px;flex-wrap:wrap">
+      <span class="card-title">Próximos Eventos</span>
+      <div class="config-filter-row" style="margin:0">
+        <button class="config-filter-chip active" type="button" data-event-filter="all">Todos</button>
+        {% for k, v in event_type_pt.items() %}<button class="config-filter-chip" type="button" data-event-filter="{{ k }}">{{ v }}</button>{% endfor %}
+      </div>
+    </div>
+    <div class="event-list" style="padding:8px">
+      {% for event in events %}
+      <div class="event-item card" data-event-type="{{ event.type }}" style="margin-bottom:0">
+        <div class="event-date-col">
+          <div class="event-day">{{ event.start_date.strftime('%d') }}</div>
+          <div class="event-month">{{ event.start_date.strftime('%b') }}</div>
+        </div>
+        <div class="event-body">
+          <div class="event-title">{{ event.title }}</div>
+          {% if event.description %}<div class="event-desc">{{ event.description }}</div>{% endif %}
+          <div class="event-meta">
+            <span>🕐 {{ event.start_date.strftime('%H:%M') }}{% if event.end_date %} – {{ event.end_date.strftime('%H:%M') }}{% endif %}</span>
+            {% if event.location %}<span>📍 {{ event.location }}</span>{% endif %}
+            {% if event.user %}<span>👤 {{ event.user.name }}</span>{% endif %}
+            <span class="badge badge-{{ event.type }}" style="background:rgba(110,86,207,0.1);color:var(--primary);border-color:rgba(110,86,207,0.2)">{{ event_type_pt.get(event.type, event.type) }}</span>
+          </div>
+        </div>
+        <form id="del-evt-{{ event.id }}" action="{{ url_for('agenda.evento_excluir', id=event.id) }}" method="post">
+          <button type="button" class="btn btn-ghost btn-icon" style="color:var(--danger)" data-delete-form="del-evt-{{ event.id }}" title="Excluir">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </button>
+        </form>
+      </div>
+      {% else %}
+      <div style="text-align:center;color:var(--text-muted);padding:40px">Nenhum evento agendado</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Tipos de Evento</span></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+        {% for k, v in event_type_pt.items() %}
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--primary);flex-shrink:0"></span>
+          {{ v }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Resumo</span></div>
+      <div class="card-body">
+        <div style="font-size:28px;font-weight:700;letter-spacing:-1px">{{ events|length }}</div>
+        <div style="font-size:13px;color:var(--text-muted)">eventos no total</div>
+        {% set upcoming = events|selectattr('start_date', 'ge', now())|list|length %}
+        <div style="margin-top:10px;font-size:13px;color:var(--success)">{{ upcoming }} próximos</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Evento -->
+<div class="modal-backdrop" id="modalNovoEvento">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Novo Evento</span>
+      <button class="modal-close" data-modal-close="modalNovoEvento">✕</button>
+    </div>
+    <form action="{{ url_for('agenda.evento_novo') }}" method="post">
+      <div class="form-group">
+        <label class="form-label">Título *</label>
+        <input type="text" name="title" class="form-control" required placeholder="Título do evento"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <textarea name="description" class="form-control" placeholder="Detalhes do evento..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Início *</label>
+          <input type="datetime-local" name="start_date" class="form-control" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fim</label>
+          <input type="datetime-local" name="end_date" class="form-control"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select name="type" class="form-control">
+            {% for k, v in event_type_pt.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Local</label>
+          <input type="text" name="location" class="form-control" placeholder="Endereço ou link"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Responsável</label>
+          <select name="user_id" class="form-control">
+            <option value="">— Opcional —</option>
+            {% for u in users %}<option value="{{ u.id }}">{{ u.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Serviço Relacionado</label>
+          <select name="service_id" class="form-control">
+            <option value="">— Opcional —</option>
+            {% for s in services %}<option value="{{ s.id }}">{{ s.title }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="modalNovoEvento">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Criar Evento</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

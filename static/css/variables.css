@@ -1,0 +1,130 @@
+/* ══════════════════════════════════════════
+   VARIABLES — Design tokens globais
+   Cores extraídas diretamente do ServiceFlow Pro (React).
+   Altere este arquivo para personalizar cores, fontes, espaçamentos, bordas e sombras.
+   ══════════════════════════════════════════ */
+
+/* ── Tokens: tema escuro (padrão) ──
+   Fonte: hsl(225 21% 7%), hsl(225 22% 11%), hsl(217 33% 17%)
+   Primary: hsl(243 75% 59%) = indigo #6366f1
+   ─────────────────────────────────────── */
+:root {
+  color-scheme: dark;
+
+  /* ──────────────────────────────────────────
+
+     Fundos
+
+     ────────────────────────────────────────── */
+  --bg: #0d1117; /* hsl(225 21%  7%) page background     */
+  --bg-card: #161b27; /* hsl(225 22% 11%) card surface        */
+  --bg-hover: #1d2839; /* hsl(217 33% 17%) hover / muted bg    */
+
+  /* ──────────────────────────────────────────
+
+     Bordas
+
+     ────────────────────────────────────────── */
+  --border: #1d2839; /* hsl(217 33% 17%) same as bg-hover    */
+
+  /* ──────────────────────────────────────────
+
+     Texto
+
+     ────────────────────────────────────────── */
+  --text: #f8fafc; /* hsl(210 40% 98%) primary text        */
+  --text-muted: #64748b; /* hsl(215 16% 47%) secondary text      */
+  --text-subtle: #334155; /* darker muted — disabled / placeholder */
+
+  /* ──────────────────────────────────────────
+
+     Primária — Indigo
+
+     ────────────────────────────────────────── */
+  --primary: #6366f1;
+  --primary-hover: #5558e3;
+  --primary-fg: #ffffff;
+  --primary-alpha: rgba(99, 102, 241, 0.15);
+
+  /* ──────────────────────────────────────────
+
+     Semânticas
+
+     ────────────────────────────────────────── */
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+  --info: #38bdf8;
+
+  /* ──────────────────────────────────────────
+
+     Layout
+
+     ────────────────────────────────────────── */
+  --sidebar-w: 260px;
+  --header-h: 60px;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-lg: 12px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* ── Tokens: tema claro ──
+   Fonte: hsl(210 20% 98%), hsl(0 0% 100%), hsl(214 32% 91%)
+   Texto: hsl(222 47% 11%) = deep navy
+   ─────────────────────────────────────── */
+.light {
+  color-scheme: light;
+
+  /* ──────────────────────────────────────────
+
+     Fundos
+
+     ────────────────────────────────────────── */
+  --bg: #f8fafc; /* hsl(210 20% 98%) soft blue-white     */
+  --bg-card: #ffffff; /* hsl(0 0% 100%)  pure white cards     */
+  --bg-hover: #f1f5f9; /* hsl(210 40% 96%) hover surface       */
+
+  /* ──────────────────────────────────────────
+
+     Bordas
+
+     ────────────────────────────────────────── */
+  --border: #e2e8f0; /* hsl(214 32% 91%) blue-grey border    */
+
+  /* ──────────────────────────────────────────
+
+     Texto
+
+     ────────────────────────────────────────── */
+  --text: #0f172a; /* hsl(222 47% 11%) deep navy           */
+  --text-muted: #64748b; /* hsl(215 16% 47%) slate               */
+  --text-subtle: #94a3b8; /* lighter slate                         */
+
+  /* ──────────────────────────────────────────
+
+     Primária — Indigo (igual no escuro)
+
+     ────────────────────────────────────────── */
+  --primary: #6366f1;
+  --primary-hover: #5558e3;
+  --primary-fg: #ffffff;
+  --primary-alpha: rgba(99, 102, 241, 0.1);
+
+  /* ──────────────────────────────────────────
+
+     Semânticas — ligeiramente mais escuras para contraste no branco
+
+     ────────────────────────────────────────── */
+  --success: #16a34a;
+  --warning: #ca8a04;
+  --danger: #dc2626;
+  --info: #0284c7;
+
+  /* ──────────────────────────────────────────
+
+     Sombra mais suave no claro
+
+     ────────────────────────────────────────── */
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
+}

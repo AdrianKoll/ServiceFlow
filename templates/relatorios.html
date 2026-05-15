@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Relatórios — ServiceFlow Pro{% endblock %}
+{% block content %}
+
+<div class="page-header pro-hero">
+  <div>
+    <h1 class="page-title">Relatórios Gerenciais</h1>
+    <p class="page-subtitle">Indicadores para decisão: operação, financeiro, clientes e equipe.</p>
+  </div>
+  <a href="{{ url_for('relatorios.relatorios_exportar_csv') }}" class="btn btn-primary">Exportar CSV</a>
+</div>
+
+<div class="kpi-grid kpi-grid-4">
+  <div class="card kpi-card"><div class="kpi-label">Receita do mês</div><div class="kpi-value">{{ fmt_brl(income_month) }}</div><div class="kpi-change kpi-up">Saldo: {{ fmt_brl(balance_month) }}</div></div>
+  <div class="card kpi-card"><div class="kpi-label">Serviços totais</div><div class="kpi-value">{{ svc_total }}</div><div class="kpi-change">{{ completion_rate }}% concluídos</div></div>
+  <div class="card kpi-card"><div class="kpi-label">Clientes</div><div class="kpi-value">{{ client_total }}</div><div class="kpi-change kpi-up">Base comercial</div></div>
+  <div class="card kpi-card"><div class="kpi-label">Atrasos</div><div class="kpi-value" style="color:var(--danger)">{{ overdue_services + overdue_tasks }}</div><div class="kpi-change kpi-down">Serviços + tarefas</div></div>
+</div>
+
+<div class="report-charts-grid">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Financeiro — últimos meses</span></div>
+    <div class="card-body"><div style="position:relative;height:260px"><canvas id="financeReportChart"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Status dos serviços</span></div>
+    <div class="card-body"><div style="position:relative;height:260px"><canvas id="statusReportChart"></canvas></div></div>
+  </div>
+</div>
+
+<div class="report-grid" style="margin-top:16px">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Clientes mais relevantes</span></div>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>Cliente</th><th>Serviços</th><th>Valor potencial</th></tr></thead>
+        <tbody>
+          {% for client, services_count, total_value in top_clients %}
+          <tr><td><strong>{{ client.name }}</strong><div class="td-muted">{{ client.company or client.email or '—' }}</div></td><td>{{ services_count }}</td><td>{{ fmt_brl(total_value) }}</td></tr>
+          {% else %}<tr><td colspan="3" class="empty-state">Nenhum cliente cadastrado.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Ranking da equipe</span>{% if can_access('desempenho') %}<a class="btn btn-ghost btn-sm" href="{{ url_for('desempenho.desempenho') }}">Detalhar</a>{% endif %}</div>
+    <div class="team-performance-list">
+      {% for row in top_team %}
+      <div class="team-score-item"><div class="team-avatar">{{ row.user.name[:2].upper() }}</div><div class="team-info"><div class="team-name">{{ row.user.name }}</div><div class="team-tasks">{{ row.task_done }} tarefas • {{ row.services_completed }} serviços</div><div class="progress-bar"><div class="progress-fill" style="width:{{ row.score }}%"></div></div></div><strong>{{ row.score }}%</strong></div>
+      {% else %}<div class="empty-state">Nenhuma equipe cadastrada.</div>{% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+ const cs=getComputedStyle(document.documentElement), get=v=>cs.getPropertyValue(v).trim();
+ const primary=get('--primary'), success=get('--success'), danger=get('--danger'), warning=get('--warning'), info=get('--info'), border=get('--border'), muted=get('--text-muted'), text=get('--text'), bg=get('--bg-card');
+ const tooltip={backgroundColor:bg,borderColor:border,borderWidth:1,titleColor:text,bodyColor:muted,padding:10,cornerRadius:8};
+ const f=document.getElementById('financeReportChart');
+ if(f) new Chart(f,{type:'bar',data:{labels:{{ finance_labels|safe }},datasets:[{label:'Receita',data:{{ finance_income|safe }},backgroundColor:success+'aa'},{label:'Despesas',data:{{ finance_expense|safe }},backgroundColor:danger+'88'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:muted}},tooltip},scales:{x:{grid:{display:false},ticks:{color:muted}},y:{beginAtZero:true,grid:{color:border},ticks:{color:muted}}}}});
+ const s=document.getElementById('statusReportChart');
+ if(s) new Chart(s,{type:'doughnut',data:{labels:{{ chart_status_labels|safe }},datasets:[{data:{{ chart_status_data|safe }},backgroundColor:[warning+'cc',info+'cc',success+'cc',danger+'cc'],borderColor:[warning,info,success,danger],borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:muted}},tooltip}}});
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="{{ session.get('theme','dark') }}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pagamento demonstrativo — ServiceFlow Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}"/>
+</head>
+<body class="public-page">
+<header class="public-nav">
+  <a href="{{ url_for('public.landing') }}" class="public-logo"><span class="public-logo-icon">SF</span><span>Service<span>Flow</span> Pro</span></a>
+  <nav class="public-links"><a href="{{ url_for('public.planos') }}">Planos</a><a href="{{ url_for('auth.login') }}" class="public-btn public-btn-ghost">Entrar</a></nav>
+</header>
+<main class="checkout-page">
+  <section class="checkout-card checkout-card-pro">
+    <div class="checkout-summary">
+      <span class="section-kicker">Checkout demonstrativo</span>
+      <h1>Contratar plano {{ plan['name'] }}</h1>
+      <div class="plan-price">{{ plan['price_label'] }}</div>
+      <p>{{ plan['description'] }}</p>
+      <div class="demo-alert"><strong>Demo segura:</strong> nenhuma cobrança real será feita. A próxima etapa cria a conta administradora da empresa.</div>
+      <ul class="checkout-steps">
+        <li><b>Plano</b><span>{{ plan['name'] }}</span></li>
+        <li><b>Status</b><span>Pagamento simulado</span></li>
+        <li><b>Próximo passo</b><span>Criar admin</span></li>
+      </ul>
+    </div>
+    <form method="post" class="demo-payment-form">
+      <h2>Dados de pagamento</h2>
+      <p class="checkout-muted">Escolha uma forma demonstrativa. Em produção, aqui entraria Stripe, Mercado Pago, Asaas, Pagar.me ou outro gateway.</p>
+      <div class="payment-tabs">
+        {% for method in payment_methods %}
+        <label><input type="radio" name="method" value="{{ method['slug'] }}" {% if loop.first %}checked{% endif %}/> {{ method['icon'] }} {{ method['name'] }}</label>
+        {% endfor %}
+      </div>
+      <div class="form-grid">
+        <label>Nome no cartão<input type="text" name="holder" value="Cliente Demonstração" autocomplete="off"/></label>
+        <label>Número do cartão<input type="text" name="card" value="4242 4242 4242 4242" autocomplete="off"/></label>
+        <label>Validade<input type="text" name="valid" value="12/30" autocomplete="off"/></label>
+        <label>CVV<input type="text" name="cvv" value="123" autocomplete="off"/></label>
+      </div>
+      <div class="pix-box"><strong>Pix demo:</strong> serviceflow-demo@pagamento.local</div>
+      <button type="submit" class="public-btn public-btn-primary public-btn-lg">Simular contratação e criar conta</button>
+      <a href="{{ url_for('auth.cadastro', plano=plan['slug']) }}" class="checkout-secondary">Pular pagamento demo e criar administrador</a>
+    </form>
+  </section>
+</main>
+</body>
+</html>
