@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="{{ session.get('theme','dark') }}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Criar Conta — ServiceFlow Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .auth-card { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:40px 36px; width:100%; max-width:480px; box-shadow:var(--shadow); }
+    .auth-logo { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+    .auth-logo-icon { width:38px; height:38px; background:var(--primary); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#fff; }
+    .auth-logo-text { font-size:18px; font-weight:700; color:var(--text); } .auth-logo-text span { color:var(--primary); }
+    .auth-title { font-size:22px; font-weight:700; margin-bottom:6px; } .auth-sub { font-size:13px; color:var(--text-muted); margin-bottom:22px; line-height:1.5; }
+    .plan-pill { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:12px 14px; border-radius:var(--radius); background:var(--primary-alpha); border:1px solid rgba(99,102,241,.25); margin-bottom:18px; font-size:13px; }
+    .plan-pill strong { color:var(--primary); } .form-group { margin-bottom:16px; } .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .form-label { display:block; font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+    .form-control { width:100%; padding:10px 14px; background:var(--bg-hover); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:14px; font-family:'Inter',sans-serif; transition:border-color .15s, box-shadow .15s; outline:none; }
+    .form-control:focus { border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-alpha); }
+    .btn-primary { width:100%; padding:11px; background:var(--primary); color:#fff; border:none; border-radius:var(--radius); font-size:14px; font-weight:600; cursor:pointer; transition:background .15s; font-family:'Inter',sans-serif; margin-top:4px; }
+    .btn-primary:hover { background:var(--primary-hover); } .auth-footer { margin-top:22px; text-align:center; font-size:13px; color:var(--text-muted); } .auth-footer a { color:var(--primary); text-decoration:none; font-weight:500; }
+    .flash-list { margin-bottom:18px; } .flash { padding:10px 14px; border-radius:var(--radius-sm); font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+    .flash.danger{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.25)} .flash.warning{background:rgba(234,179,8,.12);color:#eab308;border:1px solid rgba(234,179,8,.25)} .flash.success{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.25)} .flash.info{background:rgba(56,189,248,.12);color:#38bdf8;border:1px solid rgba(56,189,248,.25)}
+    .role-hint { font-size:11px; color:var(--text-muted); margin-top:5px; line-height:1.5; }
+    @media (max-width:540px){ .auth-card{padding:30px 22px}.form-row{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <div class="auth-logo"><div class="auth-logo-icon">SF</div><div class="auth-logo-text">Service<span>Flow</span> Pro</div></div>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-list">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+    <div class="auth-title">Criar conta administradora</div>
+    <div class="auth-sub">Esta conta será a dona do ambiente da empresa. Depois, dentro do painel, o administrador cria técnicos, gerentes e atendentes.</div>
+    <div class="plan-pill"><span>Plano selecionado</span><strong>{{ selected_plan['name'] }} · {{ selected_plan['price_label'] }}</strong></div>
+    <form method="post" action="{{ url_for('auth.cadastro', plano=plan) }}">
+      <input type="hidden" name="plan" value="{{ plan }}"/>
+      <div class="form-group"><label class="form-label" for="company_name">Empresa / Negócio</label><input type="text" id="company_name" name="company_name" class="form-control" placeholder="Nome da sua empresa" value="{{ company_name }}" required autofocus/></div>
+      <div class="form-group"><label class="form-label" for="name">Nome do administrador</label><input type="text" id="name" name="name" class="form-control" placeholder="Seu nome completo" value="{{ name }}" required/></div>
+      <div class="form-group"><label class="form-label" for="email">E-mail de acesso</label><input type="email" id="email" name="email" class="form-control" placeholder="admin@empresa.com" value="{{ email }}" required/></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" for="password">Senha</label><input type="password" id="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" required/></div><div class="form-group"><label class="form-label" for="confirm">Confirmar Senha</label><input type="password" id="confirm" name="confirm" class="form-control" placeholder="Repita a senha" required/></div></div>
+      <div class="role-hint">Você entrará como Administrador. Os usuários internos serão criados em Equipe → Novo Usuário.</div>
+      <button type="submit" class="btn-primary">Criar ambiente SaaS</button>
+    </form>
+    <div class="auth-footer">Já tem conta? <a href="{{ url_for('auth.login') }}">Fazer login</a></div>
+  </div>
+</body>
+</html>

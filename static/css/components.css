@@ -1,0 +1,1052 @@
+/* ══════════════════════════════════════════
+   COMPONENTS — Componentes reutilizáveis
+   Contém: cards, botões, formulários, tabelas,
+   badges, modais, barra de filtros e KPI cards.
+   Todos os itens aqui aparecem em múltiplos
+   módulos — não são exclusivos de nenhuma página.
+   ══════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────
+   Card (container genérico de conteúdo)
+   Uso: <div class="card"> ... </div>
+   ────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  padding: 20px 18px;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.card-body {
+  padding: 16px;
+}
+
+/* ──────────────────────────────────────────
+   Cabeçalho de página (título + ação principal)
+   ────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ──────────────────────────────────────────
+   Botões
+   Variantes: btn-primary | btn-secondary |
+              btn-danger | btn-ghost
+   Modificadores: btn-sm | btn-icon
+   ────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+.btn-secondary {
+  background: var(--bg-hover);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover {
+  border-color: var(--text-muted);
+}
+.btn-danger {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--danger);
+  border: 1px solid rgba(248, 81, 73, 0.2);
+}
+.btn-danger:hover {
+  background: rgba(248, 81, 73, 0.25);
+}
+.btn-ghost {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 5px;
+  border-radius: var(--radius-sm);
+}
+.btn-ghost:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.btn-icon {
+  padding: 6px;
+}
+.btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ──────────────────────────────────────────
+   Formulários
+   Uso: .form-group > label.form-label + input.form-control
+   Linha dupla: .form-row > .form-group + .form-group
+   ────────────────────────────────────────── */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  transition: border-color 0.15s;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-alpha);
+}
+.form-control::placeholder {
+  color: var(--text-subtle);
+}
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+select.form-control {
+  cursor: pointer;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ──────────────────────────────────────────
+   Tabela de dados
+   Ocultar colunas no mobile: class="hide-sm"
+   ────────────────────────────────────────── */
+.table-container {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-hover);
+}
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tbody tr:hover {
+  background: var(--bg-hover);
+}
+.td-muted {
+  color: var(--text-muted);
+}
+
+/* ──────────────────────────────────────────
+   Badges de status
+   Novos status: adicionar .badge-<nome> aqui
+   ────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+.badge-pending {
+  background: rgba(210, 153, 34, 0.15);
+  color: var(--warning);
+  border-color: rgba(210, 153, 34, 0.25);
+}
+.badge-in_progress {
+  background: rgba(88, 166, 255, 0.12);
+  color: var(--info);
+  border-color: rgba(88, 166, 255, 0.2);
+}
+.badge-completed,
+.badge-paid,
+.badge-done {
+  background: rgba(63, 185, 80, 0.12);
+  color: var(--success);
+  border-color: rgba(63, 185, 80, 0.2);
+}
+.badge-cancelled,
+.badge-overdue {
+  background: rgba(248, 81, 73, 0.12);
+  color: var(--danger);
+  border-color: rgba(248, 81, 73, 0.2);
+}
+.badge-todo {
+  background: rgba(125, 133, 144, 0.15);
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+.badge-review {
+  background: var(--primary-alpha);
+  color: var(--primary);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+.badge-active {
+  background: rgba(63, 185, 80, 0.12);
+  color: var(--success);
+  border-color: rgba(63, 185, 80, 0.2);
+}
+.badge-inactive {
+  background: rgba(248, 81, 73, 0.12);
+  color: var(--danger);
+  border-color: rgba(248, 81, 73, 0.2);
+}
+.badge-prospect {
+  background: rgba(88, 166, 255, 0.12);
+  color: var(--info);
+  border-color: rgba(88, 166, 255, 0.2);
+}
+
+/* ──────────────────────────────────────────
+
+   Ponto de prioridade (usado em tabelas de serviços)
+
+   ────────────────────────────────────────── */
+.priority-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+.priority-high {
+  background: var(--danger);
+}
+.priority-medium {
+  background: var(--warning);
+}
+.priority-low {
+  background: var(--text-subtle);
+}
+
+/* ──────────────────────────────────────────
+   Modal
+   Uso: .modal-backdrop.open > .modal
+   Abrir/fechar via JS: add/remove class "open"
+   ────────────────────────────────────────── */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 200;
+  backdrop-filter: blur(3px);
+  align-items: center;
+  justify-content: center;
+}
+.modal-backdrop.open {
+  display: flex;
+}
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.modal-close:hover {
+  color: var(--text);
+}
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.modal-footer .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+/* ──────────────────────────────────────────
+   Barra de filtros e busca
+   Usada no topo das listagens (serviços, etc.)
+   ────────────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.filter-tab {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+}
+.filter-tab:hover,
+.filter-tab.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.search-input {
+  padding: 7px 12px 7px 34px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  min-width: 200px;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.search-wrap {
+  position: relative;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+/* ──────────────────────────────────────────
+   KPI Cards (métricas do topo do dashboard)
+   Adicionando novo KPI: inclua apenas no
+   template dashboard.html dentro de .kpi-grid
+   ────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.kpi-card {
+  padding: 16px;
+}
+.kpi-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+.kpi-change {
+  font-size: 11.5px;
+  margin-top: 4px;
+}
+.kpi-up {
+  color: var(--success);
+}
+.kpi-down {
+  color: var(--danger);
+}
+
+/* ──────────────────────────────────────────
+   SaaS — Plano lateral, assinatura e bloqueios
+   Uso: cards de plano, alertas, grid de preços
+   e controles de upgrade/limite de recursos.
+   ────────────────────────────────────────── */
+.sidebar-plan-card {
+  margin: 0 12px 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--bg-card), rgba(99, 102, 241, 0.1));
+  box-shadow: var(--shadow-sm);
+}
+.sidebar-plan-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.sidebar-plan-top strong {
+  font-size: 12px;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.sidebar-plan-meter {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.sidebar-plan-meter span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+}
+.sidebar-upgrade-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 8px 10px;
+}
+.alert-card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-card);
+  padding: 14px 16px;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+.alert-card.warning {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.08);
+}
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.pricing-card {
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--bg-card);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+.pricing-card.highlight {
+  border-color: var(--primary);
+  box-shadow: 0 18px 50px rgba(99, 102, 241, 0.15);
+}
+.pricing-card.active:after {
+  content: "Plano atual";
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: var(--primary-alpha);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+}
+.pricing-tag {
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.pricing-card h2 {
+  margin: 8px 0 6px;
+}
+.pricing-desc {
+  color: var(--text-muted);
+  min-height: 42px;
+}
+.pricing-price {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 14px 0;
+}
+.pricing-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 18px;
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+}
+.pricing-features .muted {
+  color: var(--text-muted);
+}
+.upgrade-form {
+  display: grid;
+  gap: 10px;
+}
+.payment-methods-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.payment-pill {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--bg-muted);
+  display: grid;
+  gap: 4px;
+}
+.payment-pill span {
+  font-size: 22px;
+}
+.payment-pill small {
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.plan-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--bg-muted);
+}
+@media (max-width: 768px) {
+  .pricing-grid,
+  .payment-methods-row {
+    grid-template-columns: 1fr;
+  }
+  .pricing-card {
+    padding: 18px;
+  }
+  .pricing-price {
+    font-size: 24px;
+  }
+  .sidebar-plan-card {
+    margin: 8px 12px;
+  }
+}
+
+/* ──────────────────────────────────────────
+   SaaS completo — assinatura e maturidade
+   Contém: status de cobrança, hero da assinatura,
+   matriz de recursos, bloqueios PRO e chips de plano.
+   ────────────────────────────────────────── */
+.saas-page-header .section-kicker {
+  display: inline-flex;
+  margin-bottom: 4px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+.billing-status-pill {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text);
+}
+.billing-status-pill.active {
+  background: rgba(63, 185, 80, 0.1);
+  color: var(--success);
+  border-color: rgba(63, 185, 80, 0.25);
+}
+.billing-status-pill.trial {
+  background: rgba(88, 166, 255, 0.1);
+  color: var(--info);
+  border-color: rgba(88, 166, 255, 0.25);
+}
+.billing-status-pill.cancel_scheduled {
+  background: rgba(210, 153, 34, 0.1);
+  color: var(--warning);
+  border-color: rgba(210, 153, 34, 0.25);
+}
+.subscription-hero {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, var(--bg-card), rgba(99, 102, 241, 0.09));
+}
+.subscription-main {
+  display: grid;
+  gap: 8px;
+}
+.subscription-main h2 {
+  font-size: 30px;
+  line-height: 1;
+  margin: 0;
+}
+.subscription-main p {
+  color: var(--text-muted);
+  max-width: 720px;
+}
+.subscription-price {
+  font-size: 26px;
+  font-weight: 900;
+}
+.subscription-price span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.subscription-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.subscription-meta span {
+  font-size: 12px;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: var(--bg);
+}
+.subscription-actions {
+  min-width: 210px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.subscription-actions form {
+  width: 100%;
+}
+.subscription-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+.subscription-usage-grid {
+  margin-bottom: 18px;
+}
+.usage-card {
+  display: grid;
+  gap: 8px;
+}
+.usage-card.warning {
+  border-color: rgba(210, 153, 34, 0.35);
+  background: rgba(210, 153, 34, 0.06);
+}
+.usage-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.usage-top span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.usage-top strong {
+  font-size: 16px;
+}
+.usage-card small {
+  color: var(--text-muted);
+}
+.recommended-ribbon {
+  position: absolute;
+  top: -11px;
+  right: 18px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: var(--shadow-sm);
+}
+.feature-matrix-card table td,
+.feature-matrix-card table th {
+  text-align: left;
+}
+.nav-item.locked {
+  opacity: 0.78;
+}
+.nav-lock-badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: var(--primary-alpha);
+  color: var(--primary);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+.pro-lock-card {
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  background: linear-gradient(135deg, var(--bg-card), rgba(99, 102, 241, 0.1));
+}
+.pro-lock-card .lock-title {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+.pro-lock-card .lock-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.plan-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+}
+@media (max-width: 768px) {
+  .subscription-hero {
+    flex-direction: column;
+    padding: 16px;
+  }
+  .subscription-main h2 {
+    font-size: 24px;
+  }
+  .subscription-price {
+    font-size: 22px;
+  }
+  .subscription-actions {
+    min-width: 0;
+    justify-content: stretch;
+  }
+  .subscription-meta {
+    gap: 6px;
+  }
+  .subscription-meta span {
+    width: 100%;
+    border-radius: 12px;
+  }
+  .feature-matrix-card table {
+    min-width: 520px;
+  }
+  .billing-status-pill {
+    align-self: flex-start;
+  }
+  .internal-pricing .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ──────────────────────────────────────────
+   Assinatura SaaS refinada
+   Contém: visão geral do plano, uso, fluxo de
+   cobrança, cards de preço e métodos de pagamento.
+   ────────────────────────────────────────── */
+.billing-header-pro {
+  align-items: flex-start;
+}
+.billing-overview-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 18px;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, var(--bg-card), rgba(99, 102, 241, 0.1));
+}
+.billing-overview-main {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.billing-plan-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: var(--primary);
+  color: white;
+  font-weight: 900;
+  box-shadow: 0 14px 35px rgba(99, 102, 241, 0.24);
+  flex: 0 0 auto;
+}
+.billing-overview-main h2 {
+  font-size: 34px;
+  margin: 6px 0 8px;
+  letter-spacing: -0.04em;
+}
+.billing-overview-main p {
+  color: var(--text-muted);
+  max-width: 760px;
+}
+.billing-overview-side {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.billing-overview-side div {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--bg);
+}
+.billing-overview-side small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 5px;
+}
+.billing-overview-side strong {
+  font-size: 14px;
+}
+.billing-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+.billing-payment-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(360px, 1fr);
+  gap: 18px;
+  align-items: stretch;
+  padding: 20px 24px;
+}
+.billing-payment-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.billing-payment-info h3 {
+  margin: 0 0 6px;
+}
+.billing-payment-info p {
+  margin: 0;
+  line-height: 1.5;
+}
+.billing-card-large {
+  min-height: 100%;
+}
+.billing-usage-list,
+.billing-flow-list {
+  display: grid;
+  gap: 12px;
+}
+.usage-row {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--bg);
+}
+.usage-row.warning {
+  border-color: rgba(210, 153, 34, 0.35);
+  background: rgba(210, 153, 34, 0.06);
+}
+.usage-row-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.usage-row small {
+  color: var(--text-muted);
+}
+.billing-flow-list div {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--bg);
+}
+.billing-flow-list b {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-alpha);
+  color: var(--primary);
+  flex: 0 0 auto;
+}
+.billing-flow-list span {
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.billing-plans-wrapper {
+  margin-top: 8px;
+}
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin: 0 0 16px;
+}
+.section-title-row h2 {
+  margin: 6px 0 0;
+  font-size: 26px;
+  letter-spacing: -0.03em;
+}
+.billing-pricing-grid .pricing-card {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.billing-pricing-grid .upgrade-form {
+  margin-top: auto;
+}
+.billing-matrix-card,
+.billing-payment-card {
+  margin-top: 18px;
+}
+.billing-payment-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(360px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .billing-overview-card,
+  .billing-section-grid,
+  .billing-payment-card {
+    grid-template-columns: 1fr;
+  }
+  .billing-overview-side {
+    grid-template-columns: 1fr 1fr;
+  }
+  .section-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .billing-overview-main h2 {
+    font-size: 28px;
+  }
+}
+@media (max-width: 560px) {
+  .billing-overview-card {
+    padding: 16px;
+  }
+  .billing-overview-main {
+    flex-direction: column;
+  }
+  .billing-overview-side {
+    grid-template-columns: 1fr;
+  }
+  .billing-section-grid {
+    gap: 12px;
+  }
+  .billing-flow-list div {
+    padding: 12px;
+  }
+  .billing-pricing-grid {
+    grid-template-columns: 1fr;
+  }
+  .payment-methods-row {
+    grid-template-columns: 1fr;
+  }
+  .feature-matrix-card .table-container {
+    overflow-x: auto;
+  }
+}
+@media (max-width: 900px) {
+  .billing-payment-card {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}

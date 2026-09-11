@@ -1,0 +1,638 @@
+/* ══════════════════════════════════════════
+   MÓDULO: Mensagens
+   Página: /mensagens
+   Contém: layout de chat (lista de threads
+   à esquerda + área de conversa à direita),
+   balões de mensagem, ações de edição/exclusão
+   e barra de envio.
+   ══════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────
+   Layout principal: lista de threads | chat
+   ────────────────────────────────────────── */
+.messages-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  height: calc(100vh - var(--header-h) - 80px);
+  min-height: 500px;
+}
+
+/* ──────────────────────────────────────────
+   Coluna esquerda — lista de conversas
+   ────────────────────────────────────────── */
+.thread-list {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+.thread-list-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.thread-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.thread-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+  text-decoration: none;
+  display: block;
+}
+.thread-item:hover,
+.thread-item.active {
+  background: var(--bg-hover);
+}
+.thread-item.active {
+  border-left: 3px solid var(--primary);
+}
+.thread-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.thread-last {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ──────────────────────────────────────────
+   Coluna direita — área de conversa
+   ────────────────────────────────────────── */
+.chat-area {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ──────────────────────────────────────────
+
+   Cabeçalho com título e botão excluir conversa
+
+   ────────────────────────────────────────── */
+.chat-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.chat-header-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ──────────────────────────────────────────
+
+   Lista de mensagens com scroll
+
+   ────────────────────────────────────────── */
+.chat-msgs {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 36px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+}
+
+/* ──────────────────────────────────────────
+
+   Botão flutuante "ir para o final"
+
+   ────────────────────────────────────────── */
+.chat-scroll-btn {
+  position: absolute;
+  bottom: 72px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+  z-index: 10;
+}
+.chat-scroll-btn.visible {
+  display: flex;
+}
+.chat-scroll-btn:hover {
+  transform: scale(1.08);
+}
+
+/* ──────────────────────────────────────────
+   Linha de mensagem — espelho do React
+   flex horizontal, mine invertido à direita
+   ────────────────────────────────────────── */
+.msg-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.msg-row-mine {
+  flex-direction: row-reverse;
+}
+
+/* ──────────────────────────────────────────
+
+   Avatar colorido (só para mensagens de outros)
+
+   ────────────────────────────────────────── */
+.msg-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ──────────────────────────────────────────
+
+   Coluna: bubble-wrap + form de edição
+
+   ────────────────────────────────────────── */
+.msg-content-col {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+}
+.msg-row-mine .msg-content-col {
+  align-items: flex-end;
+}
+
+/* ──────────────────────────────────────────
+   Wrapper relativo — ancora o tooltip
+   ────────────────────────────────────────── */
+.msg-bubble-wrap {
+  position: relative;
+}
+
+/* ──────────────────────────────────────────
+
+   Tooltip de ações (editar/excluir) — posicionado acima do balão
+
+   ────────────────────────────────────────── */
+.msg-actions-tooltip {
+  display: none;
+  position: absolute;
+  top: -34px;
+  right: 0;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+/* ──────────────────────────────────────────
+   Mostra ao hover do bubble-wrap (não do row) — mais estável
+   ────────────────────────────────────────── */
+.msg-row-mine .msg-bubble-wrap:hover .msg-actions-tooltip {
+  display: flex;
+}
+
+/* ──────────────────────────────────────────
+
+   Ponte invisível para manter o hover ao subir o mouse até o tooltip
+
+   ────────────────────────────────────────── */
+.msg-row-mine .msg-bubble-wrap::before {
+  content: "";
+  position: absolute;
+  top: -34px;
+  left: 0;
+  right: 0;
+  height: 34px;
+}
+
+.msg-action-btn {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 3px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition:
+    color 0.12s,
+    background 0.12s;
+}
+.msg-action-btn:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+.msg-action-danger:hover {
+  color: var(--danger);
+  background: rgba(248, 81, 73, 0.08);
+}
+
+/* ──────────────────────────────────────────
+   Balões — idênticos ao React ServiceFlow Pro
+   ────────────────────────────────────────── */
+.msg-bubble {
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* ──────────────────────────────────────────
+
+   Mine: fundo primário, canto inferior direito cortado
+
+   ────────────────────────────────────────── */
+.msg-bubble.mine {
+  background: var(--primary);
+  color: #fff;
+  border-bottom-right-radius: 2px;
+}
+
+/* ──────────────────────────────────────────
+
+   Other: fundo secundário, borda, canto inferior esquerdo cortado
+
+   ────────────────────────────────────────── */
+.msg-bubble.other {
+  background: var(--bg-hover);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 2px;
+}
+
+/* ──────────────────────────────────────────
+
+   Nome do remetente dentro do balão
+
+   ────────────────────────────────────────── */
+.msg-bubble-sender {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.7;
+  margin-bottom: 3px;
+}
+
+/* ──────────────────────────────────────────
+
+   Texto da mensagem
+
+   ────────────────────────────────────────── */
+.msg-text {
+  display: block;
+}
+
+/* ──────────────────────────────────────────
+
+   Hora + editado dentro do balão
+
+   ────────────────────────────────────────── */
+.msg-bubble-time {
+  display: block;
+  font-size: 10px;
+  margin-top: 4px;
+  opacity: 0.7;
+}
+.msg-bubble.mine .msg-bubble-time {
+  color: rgba(255, 255, 255, 0.75);
+  opacity: 1;
+}
+.msg-bubble.other .msg-bubble-time {
+  color: var(--text-muted);
+}
+
+/* ──────────────────────────────────────────
+   Formulário de edição inline
+   ────────────────────────────────────────── */
+.msg-edit-form {
+  width: 100%;
+}
+.msg-edit-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  resize: none;
+  box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.15);
+}
+.msg-edit-input:focus {
+  outline: none;
+}
+.msg-edit-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  justify-content: flex-end;
+}
+
+/* ──────────────────────────────────────────
+   Barra de envio de nova mensagem
+   ────────────────────────────────────────── */
+.chat-input-bar {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+.chat-input-bar input {
+  flex: 1;
+  padding: 9px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+}
+.chat-input-bar input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* ──────────────────────────────────────────
+   Estado vazio (nenhuma conversa selecionada)
+   ────────────────────────────────────────── */
+.chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  gap: 8px;
+  font-size: 14px;
+}
+
+/* ──────────────────────────────────────────
+   Contador na lista de threads
+   ────────────────────────────────────────── */
+.thread-list-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 10px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  color: var(--text-muted);
+}
+
+/* ──────────────────────────────────────────
+
+   Subtítulo da conversa ativa
+
+   ────────────────────────────────────────── */
+.chat-header-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ──────────────────────────────────────────
+   Modal — Botões de seleção rápida por equipe
+   Clicar seleciona todos os membros do cargo
+   ────────────────────────────────────────── */
+.quick-select-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.quick-select-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.quick-select-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(110, 86, 207, 0.06);
+}
+.quick-select-all {
+  background: rgba(110, 86, 207, 0.08);
+  border-color: rgba(110, 86, 207, 0.3);
+  color: var(--primary);
+}
+.quick-select-count {
+  background: var(--bg-hover);
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 10.5px;
+}
+
+/* ──────────────────────────────────────────
+   Modal — Lista de participantes agrupada
+   Apenas funcionários aparecem aqui (clientes
+   são excluídos no backend via EMPLOYEE_ROLES)
+   ────────────────────────────────────────── */
+.participant-counter {
+  font-size: 11.5px;
+  color: var(--primary);
+  font-weight: 400;
+  margin-left: 6px;
+}
+.participant-list {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+/* ──────────────────────────────────────────
+
+   Grupo de participantes por cargo
+
+   ────────────────────────────────────────── */
+.participant-role-group {
+  border-bottom: 1px solid var(--border);
+}
+.participant-role-group:last-child {
+  border-bottom: none;
+}
+.participant-role-label {
+  padding: 6px 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--bg-hover);
+}
+
+/* ──────────────────────────────────────────
+
+   Linha individual de participante
+
+   ────────────────────────────────────────── */
+.participant-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.participant-item:hover {
+  background: var(--bg-hover);
+}
+.participant-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(110, 86, 207, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.participant-info {
+  flex: 1;
+  min-width: 0;
+}
+.participant-name {
+  font-size: 13px;
+  font-weight: 500;
+  display: block;
+}
+.participant-role-tag {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ──────────────────────────────────────────
+   Toolbar compacta de mensagens
+   substitui os KPIs grandes por chips discretos
+   ────────────────────────────────────────── */
+.messages-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -2px 0 12px;
+  padding: 10px 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.035),
+    rgba(255, 255, 255, 0.015)
+  );
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 14px);
+}
+.messages-toolbar-left {
+  min-width: 0;
+}
+.messages-toolbar-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text);
+}
+.messages-toolbar-subtitle {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.messages-compact-stats {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.messages-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.messages-stat-chip strong {
+  color: var(--text);
+  font-size: 12.5px;
+  line-height: 1;
+}
+.stat-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.12);
+}
+.stat-dot-blue {
+  background: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+}
+.stat-dot-green {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+@media (max-width: 720px) {
+  .messages-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .messages-compact-stats {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .messages-stat-chip {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}

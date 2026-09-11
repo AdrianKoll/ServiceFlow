@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+{% block title %}Mensagens — ServiceFlow Pro{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Mensagens</div>
+    <div class="page-subtitle">Comunicação interna da equipe</div>
+  </div>
+  <button class="btn btn-primary" data-modal-open="modalNovoThread">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Nova Conversa
+  </button>
+</div>
+
+<div class="messages-toolbar">
+  <div class="messages-toolbar-left">
+    <span class="messages-toolbar-title">Central de comunicação</span>
+    <span class="messages-toolbar-subtitle">Resumo rápido das conversas internas</span>
+  </div>
+  <div class="messages-compact-stats" aria-label="Resumo de mensagens">
+    <div class="messages-stat-chip">
+      <span class="stat-dot"></span>
+      <strong>{{ threads_total }}</strong>
+      <span>conversas</span>
+    </div>
+    <div class="messages-stat-chip">
+      <span class="stat-dot stat-dot-blue"></span>
+      <strong>{{ messages_total }}</strong>
+      <span>mensagens</span>
+    </div>
+    <div class="messages-stat-chip">
+      <span class="stat-dot stat-dot-green"></span>
+      <strong>{{ employees_total }}</strong>
+      <span>ativos</span>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="overflow:hidden">
+  <div class="messages-layout">
+
+    <!-- ── Lista de conversas ── -->
+    <div class="thread-list">
+      <div class="thread-list-header">
+        Conversas
+        <span class="thread-list-count">{{ threads|length }}</span>
+      </div>
+      {% for thread in threads %}
+      <a href="{{ url_for('mensagens.mensagens', thread=thread.id) }}"
+         class="thread-item {% if thread_id == thread.id %}active{% endif %}">
+        <div class="thread-name">{{ thread.title }}</div>
+        <div class="thread-last">{{ fmt_datetime(thread.updated_at) }}</div>
+      </a>
+      {% else %}
+      <div class="thread-empty">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:8px;opacity:.4"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Nenhuma conversa ainda
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ── Área de chat ── -->
+    <div class="chat-area" style="position:relative">
+      {% if active_thread %}
+
+      <!-- Cabeçalho da conversa -->
+      <div class="chat-header">
+        <div>
+          <div class="chat-header-title">{{ active_thread.title }}</div>
+          <div class="chat-header-sub">
+            {% set participants = active_thread.messages.all() %}
+            Conversa interna — apenas funcionários
+          </div>
+        </div>
+        <form action="{{ url_for('mensagens.thread_excluir', thread_id=active_thread.id) }}" method="post"
+              onsubmit="return confirm('Excluir esta conversa e todas as mensagens?')">
+          <button type="submit" class="btn btn-ghost btn-icon" title="Excluir conversa"
+                  style="color:var(--danger)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Mensagens -->
+      <div class="chat-msgs" id="chatMsgs">
+        {% set avatar_palette = ['#3b82f6','#8b5cf6','#06b6d4','#6366f1','#f43f5e','#f59e0b','#10b981'] %}
+        {% for msg, sender_name in thread_messages %}
+        {% set is_mine = msg.sender_id == session.get('user_id') %}
+        {% set sname = sender_name or 'Desconhecido' %}
+        {% set sparts = sname.split() %}
+        {% set sinitials = (sparts[0][0] + (sparts[1][0] if sparts|length > 1 else ''))|upper %}
+        {% set acolor = avatar_palette[msg.sender_id % 7] %}
+
+        <div class="msg-row {% if is_mine %}msg-row-mine{% endif %}" data-msg-id="{{ msg.id }}">
+
+          {# Avatar colorido — só para mensagens de outros #}
+          {% if not is_mine %}
+          <div class="msg-avatar" style="background:{{ acolor }}" title="{{ sname }}">{{ sinitials }}</div>
+          {% endif %}
+
+          {# Coluna do conteúdo: tooltip + balão + form de edição #}
+          <div class="msg-content-col">
+
+            {# Modo visualização #}
+            <div id="view-{{ msg.id }}" class="msg-bubble-wrap">
+
+              {# Tooltip de ações (só para mim, aparece ao hover) #}
+              {% if is_mine %}
+              <div class="msg-actions-tooltip">
+                <button type="button" class="msg-action-btn" title="Editar" onclick="toggleEdit({{ msg.id }})">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <form action="{{ url_for('mensagens.mensagem_excluir', thread_id=active_thread.id, msg_id=msg.id) }}"
+                      method="post" style="display:inline"
+                      onsubmit="return confirm('Excluir esta mensagem?')">
+                  <button type="submit" class="msg-action-btn msg-action-danger" title="Excluir">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                  </button>
+                </form>
+              </div>
+              {% endif %}
+
+              {# Balão #}
+              <div class="msg-bubble {% if is_mine %}mine{% else %}other{% endif %}">
+                {% if not is_mine %}
+                <span class="msg-bubble-sender">{{ sname }}</span>
+                {% endif %}
+                <span class="msg-text">{{ msg.content }}</span>
+                <span class="msg-bubble-time">
+                  {{ fmt_datetime(msg.created_at) }}{% if msg.edited_at %} · <em>editado</em>{% endif %}
+                </span>
+              </div>
+            </div>
+
+            {# Modo edição #}
+            {% if is_mine %}
+            <div id="edit-{{ msg.id }}" class="msg-edit-form" style="display:none">
+              <form action="{{ url_for('mensagens.mensagem_editar', thread_id=active_thread.id, msg_id=msg.id) }}" method="post">
+                <textarea name="content" class="msg-edit-input" rows="2">{{ msg.content }}</textarea>
+                <div class="msg-edit-actions">
+                  <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit({{ msg.id }})">Cancelar</button>
+                </div>
+              </form>
+            </div>
+            {% endif %}
+
+          </div>
+        </div>
+        {% else %}
+        <div class="chat-empty">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <span>Nenhuma mensagem ainda</span>
+          <span style="font-size:12px">Comece a conversa abaixo!</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Botão flutuante: voltar ao final -->
+      <button id="btnScrollDown" class="chat-scroll-btn" title="Ir para o final" onclick="scrollToBottom(true)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <!-- Barra de envio -->
+      <form class="chat-input-bar"
+            action="{{ url_for('mensagens.mensagem_enviar', thread_id=active_thread.id) }}" method="post">
+        <input type="text" name="content" id="msgInput"
+               placeholder="Digite uma mensagem e pressione Enter ou clique em enviar…"
+               required autocomplete="off"/>
+        <button type="submit" class="btn btn-primary" title="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </form>
+
+      {% else %}
+      <div class="chat-empty" style="height:100%">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span style="font-size:16px;font-weight:500">Selecione uma conversa</span>
+        <span style="font-size:13px">Ou crie um novo grupo para começar a se comunicar</span>
+        <button class="btn btn-primary" data-modal-open="modalNovoThread" style="margin-top:8px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M12 5v14M5 12h14"/></svg>
+          Nova Conversa
+        </button>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     Modal — Criar nova conversa em grupo
+     ══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalNovoThread">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <span class="modal-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             style="width:18px;height:18px;margin-right:8px;vertical-align:middle">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+        Nova Conversa em Grupo
+      </span>
+      <button class="modal-close" data-modal-close="modalNovoThread">✕</button>
+    </div>
+
+    <form action="{{ url_for('mensagens.mensagem_novo_thread') }}" method="post" id="formNovoThread">
+
+      <!-- Nome do grupo -->
+      <div class="form-group">
+        <label class="form-label">Nome do grupo *</label>
+        <input type="text" name="title" class="form-control" required
+               placeholder="Ex: Time Frontend, Equipe de Técnicos, Suporte..."/>
+      </div>
+
+      <!-- Seleção rápida por equipe -->
+      <div class="form-group">
+        <label class="form-label">Seleção rápida por equipe</label>
+        <div class="quick-select-group">
+          {% for role, role_users in users_by_role.items() %}
+          <button type="button" class="quick-select-btn"
+                  onclick="selectRole('{{ role }}', this)"
+                  data-role="{{ role }}">
+            {{ role_pt.get(role, role) }}
+            <span class="quick-select-count">{{ role_users|length }}</span>
+          </button>
+          {% endfor %}
+          <button type="button" class="quick-select-btn quick-select-all"
+                  onclick="selectAll(this)">
+            Todos
+            <span class="quick-select-count">{{ users|length }}</span>
+          </button>
+          <button type="button" class="quick-select-btn"
+                  onclick="clearAll()" style="color:var(--danger)">
+            Limpar
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de participantes agrupada por cargo -->
+      <div class="form-group">
+        <label class="form-label">
+          Participantes
+          <span class="participant-counter" id="participantCounter">(0 selecionados)</span>
+        </label>
+        <div class="participant-list">
+          {% for role, role_users in users_by_role.items() %}
+          <div class="participant-role-group">
+            <div class="participant-role-label">{{ role_pt.get(role, role) }}</div>
+            {% for u in role_users %}
+            <label class="participant-item" data-role="{{ u.role }}">
+              <input type="checkbox" name="participant_ids" value="{{ u.id }}"
+                     class="participant-check"
+                     onchange="updateCounter()"
+                     style="accent-color:var(--primary)"/>
+              <div class="participant-avatar">{{ u.name[0]|upper }}</div>
+              <div class="participant-info">
+                <span class="participant-name">{{ u.name }}</span>
+                <span class="participant-role-tag">{{ role_pt.get(u.role, u.role) }}</span>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px">
+            Nenhum funcionário cadastrado. Adicione membros em Equipe primeiro.
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Mensagem inicial opcional -->
+      <div class="form-group">
+        <label class="form-label">Mensagem inicial <span style="color:var(--text-subtle)">(opcional)</span></label>
+        <input type="text" name="initial_message" class="form-control"
+               placeholder="Ex: Olá time! Vamos alinhar os projetos da semana."/>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+                data-modal-close="modalNovoThread">Cancelar</button>
+        <button type="submit" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               style="width:15px;height:15px"><path d="M12 5v14M5 12h14"/></svg>
+          Criar Grupo
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Scroll inteligente ──
+const chatMsgs      = document.getElementById('chatMsgs');
+const btnScrollDown = document.getElementById('btnScrollDown');
+
+function isAtBottom() {
+  if (!chatMsgs) return true;
+  return chatMsgs.scrollHeight - chatMsgs.scrollTop - chatMsgs.clientHeight < 60;
+}
+
+function scrollToBottom(smooth) {
+  if (!chatMsgs) return;
+  chatMsgs.scrollTo({ top: chatMsgs.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
+}
+
+function updateScrollBtn() {
+  if (!btnScrollDown) return;
+  btnScrollDown.classList.toggle('visible', !isAtBottom());
+}
+
+// Primeiro acesso: desce sem animação
+scrollToBottom(false);
+
+// Detectar rolagem manual
+if (chatMsgs) {
+  chatMsgs.addEventListener('scroll', updateScrollBtn, { passive: true });
+}
+
+// ── Foco no campo ao abrir conversa ──
+const msgInput = document.getElementById('msgInput');
+if (msgInput) msgInput.focus();
+
+// ── Alternar modo edição de mensagem ──
+function toggleEdit(msgId) {
+  const view = document.getElementById('view-' + msgId);
+  const edit = document.getElementById('edit-' + msgId);
+  const isEditing = edit.style.display !== 'none';
+  view.style.display = isEditing ? '' : 'none';
+  edit.style.display = isEditing ? 'none' : '';
+  if (!isEditing) {
+    const ta = edit.querySelector('textarea');
+    if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  }
+}
+
+// ── Seleção rápida por cargo ──
+function selectRole(role, btn) {
+  const checks = document.querySelectorAll('.participant-check');
+  checks.forEach(c => {
+    const item = c.closest('.participant-item');
+    if (item && item.dataset.role === role) c.checked = true;
+  });
+  updateCounter();
+}
+
+// ── Selecionar todos ──
+function selectAll(btn) {
+  document.querySelectorAll('.participant-check').forEach(c => c.checked = true);
+  updateCounter();
+}
+
+// ── Limpar seleção ──
+function clearAll() {
+  document.querySelectorAll('.participant-check').forEach(c => c.checked = false);
+  updateCounter();
+}
+
+// ── Atualizar contador de selecionados ──
+function updateCounter() {
+  const total = document.querySelectorAll('.participant-check:checked').length;
+  const el = document.getElementById('participantCounter');
+  if (el) el.textContent = total === 0 ? '(nenhum selecionado)' :
+                           total === 1 ? '(1 selecionado)' :
+                           `(${total} selecionados)`;
+}
+</script>
+{% endblock %}

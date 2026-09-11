@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="{{ session.get('theme','dark') }}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Planos — ServiceFlow Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}"/>
+</head>
+<body class="public-page">
+<header class="public-nav">
+  <a href="{{ url_for('public.landing') }}" class="public-logo" aria-label="ServiceFlow Pro">
+    <span class="public-logo-icon">SF</span><span>Service<span>Flow</span> Pro</span>
+  </a>
+  <nav class="public-links">
+    <a href="{{ url_for('public.landing') }}">Início</a>
+    <a href="{{ url_for('auth.login') }}" class="public-btn public-btn-ghost">Entrar</a>
+    <a href="{{ url_for('auth.cadastro', plano='basic') }}" class="public-btn public-btn-primary">Criar conta</a>
+  </nav>
+</header>
+
+<main class="plans-page">
+  <section class="section-head page-title">
+    <span class="section-kicker">Planos e pagamento</span>
+    <h1>Escolha o plano e crie o administrador da sua empresa.</h1>
+    <p>O contratante cria a conta principal como administrador. Depois, dentro do painel, ele cadastra técnicos, gerentes e atendentes da própria empresa.</p>
+  </section>
+
+  <section class="plans-grid plans-grid-two">
+    {% for plan in plans %}
+    <article class="plan-card {% if plan['slug'] == 'pro' %}highlight{% endif %}">
+      {% if plan['slug'] == 'pro' %}<div class="recommended-ribbon-public">Mais completo</div>{% endif %}
+      <span class="plan-tag">{{ plan['tag'] }}</span>
+      <h2>{{ plan['name'] }}</h2>
+      <div class="plan-price">{{ plan['price_label'] }}</div>
+      <p>{{ plan['description'] }}</p>
+      <ul class="plan-features">
+        {% for feature in plan['feature_list'] %}<li>✓ {{ feature }}</li>{% endfor %}
+        {% for locked in plan['locked_list'] %}<li class="muted">✕ {{ locked }}</li>{% endfor %}
+      </ul>
+      <div class="plan-actions-public">
+        <a href="{{ url_for('public.pagamento_demo', plano=plan['slug']) }}" class="public-btn {% if plan['slug'] == 'pro' %}public-btn-primary{% else %}public-btn-ghost{% endif %}">Selecionar {{ plan['name'] }}</a>
+        <a href="{{ url_for('auth.cadastro', plano=plan['slug']) }}" class="checkout-secondary">Criar admin sem pagamento demo</a>
+      </div>
+    </article>
+    {% endfor %}
+  </section>
+
+  <section class="checkout-info-grid">
+    <div class="method-card"><strong>1. Escolha o plano</strong><span>Básico para começar ou Pro para liberar financeiro, relatórios e desempenho.</span></div>
+    <div class="method-card"><strong>2. Simule a contratação</strong><span>O pagamento é demonstrativo nesta versão. Nenhuma cobrança real é feita.</span></div>
+    <div class="method-card"><strong>3. Crie o administrador</strong><span>Após o plano, a conta criada vira o administrador da empresa.</span></div>
+  </section>
+</main>
+</body>
+</html>

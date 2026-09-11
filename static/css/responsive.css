@@ -1,0 +1,499 @@
+/* ══════════════════════════════════════════
+   RESPONSIVE — Breakpoints tablet e mobile
+   Desktop (≥ 1025px): sidebar permanente.
+   Breakpoints:
+     Desktop  ≥ 1025px
+     Tablet   769px – 1024px
+     Mobile   ≤ 768px
+     Small    ≤ 480px
+   ══════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────────────────
+   TABLET  (769 px – 1024 px)
+   Objetivo: ajustar grids de 4 colunas para 2 e empilhar os
+   gráficos side-by-side que ficam apertados nessa largura.
+   ──────────────────────────────────────────────────────────── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* ──────────────────────────────────────────
+     KPI 4 colunas → 2 colunas
+     ────────────────────────────────────────── */
+  .kpi-grid-4,
+  .finance-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Dashboard: gráfico de área + donut empilham
+
+     ────────────────────────────────────────── */
+  .dash-charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Mensagens: diminui painel de threads
+
+     ────────────────────────────────────────── */
+  .messages-layout {
+    grid-template-columns: 220px 1fr;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Configurações: nav mais estreita
+
+     ────────────────────────────────────────── */
+  .config-grid {
+    grid-template-columns: 160px 1fr;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Dropdowns não transbordam em tablet
+
+     ────────────────────────────────────────── */
+  .dropdown-panel {
+    right: 0;
+    width: 290px;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Agenda: coluna lateral fica apertada no tablet
+
+     ────────────────────────────────────────── */
+  .agenda-layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Relatórios: donut empilha no tablet também
+
+     ────────────────────────────────────────── */
+  .report-donut-wrap {
+    flex-direction: column;
+    align-items: center;
+  }
+  .report-donut-canvas {
+    flex: none;
+    width: 180px;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   MOBILE  (≤ 768 px)
+   ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* ── Espaçamento geral ── */
+  .page-body {
+    padding: 14px;
+  }
+
+  /* ── Header ── */
+  .header-search {
+    flex: 1;
+    max-width: 200px;
+  }
+  .profile-name {
+    display: none;
+  }
+  .profile-btn {
+    padding: 4px 6px;
+  }
+
+  /* ── Dropdowns — nunca transbordam a tela ──
+     Usa largura dinâmica para caber em qualquer tela.     */
+  .dropdown-panel {
+    position: fixed;
+    top: var(--header-h);
+    right: 8px;
+    left: auto;
+    width: min(300px, calc(100vw - 16px));
+    max-height: calc(100vh - var(--header-h) - 16px);
+    overflow-y: auto;
+  }
+  .profile-panel {
+    width: min(220px, calc(100vw - 16px));
+  }
+
+  /* ── Cabeçalho de página ── */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .page-header > * {
+    width: 100%;
+  }
+  .page-header .btn {
+    justify-content: center;
+  }
+
+  /* ── KPI grids ── */
+  .kpi-grid,
+  .kpi-grid-4,
+  .finance-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* ── Dashboard ── */
+  .dash-charts-grid {
+    grid-template-columns: 1fr;
+  }
+  .dash-stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ── Kanban — scroll horizontal ── */
+  .kanban {
+    grid-template-columns: repeat(4, min(280px, 72vw));
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+    gap: 12px;
+  }
+
+  /* ── Grids de módulos → coluna única ── */
+  .report-grid,
+  .report-charts-grid,
+  .finance-summary,
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Configurações ── */
+  .config-grid {
+    grid-template-columns: 1fr;
+  }
+  .config-menu {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .config-menu-item {
+    flex: 0 0 auto;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12.5px;
+    width: auto;
+  }
+  .config-menu-item.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  /* ── Mensagens ── */
+  .messages-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    min-height: unset;
+  }
+  .thread-list {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .chat-area {
+    min-height: 420px;
+  }
+  .chat-msgs {
+    min-height: 280px;
+  }
+
+  /* ── Tabelas — scroll horizontal ── */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table th.hide-sm,
+  table td.hide-sm {
+    display: none;
+  }
+
+  /* ── Barra de filtros ── */
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .filter-tabs {
+    flex-wrap: wrap;
+  }
+  .search-wrap {
+    width: 100%;
+  }
+  .search-input {
+    width: 100%;
+    min-width: unset;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Filtros inline do Financeiro
+
+     ────────────────────────────────────────── */
+  .filter-tabs-inline {
+    flex-wrap: wrap;
+  }
+
+  /* ── Donut do dashboard ── */
+  .dash-donut-wrap {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ── Agenda — empilha lista + painel lateral ── */
+  .agenda-grid,
+  .agenda-layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Relatórios — donut empilha no mobile ── */
+  .report-donut-wrap {
+    flex-direction: column;
+    align-items: center;
+  }
+  .report-donut-canvas {
+    flex: none;
+    width: 180px;
+  }
+
+  /* ── Balões de mensagem ── */
+  .msg-bubble {
+    max-width: 85%;
+  }
+  .msg-edit-form {
+    max-width: 85%;
+  }
+
+  /* ── Cards de dash com scroll ── */
+  .dash-recent-card {
+    max-height: 360px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dash-recent-card .card-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg-card);
+  }
+  .dash-recent-card .table-container {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   SMALL MOBILE  (≤ 480 px)
+   Ajustes adicionais para telas muito pequenas (320–480 px).
+   ──────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* ──────────────────────────────────────────
+     Busca do header desaparece — fica só ícone hambúrguer
+     ────────────────────────────────────────── */
+  .header-search {
+    display: none;
+  }
+
+  /* ──────────────────────────────────────────
+
+     KPI → 1 coluna
+
+     ────────────────────────────────────────── */
+  .kpi-grid,
+  .kpi-grid-4,
+  .finance-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Dashboard stats → 1 coluna
+
+     ────────────────────────────────────────── */
+  .dash-stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Título de página menor
+
+     ────────────────────────────────────────── */
+  .page-title {
+    font-size: 18px;
+  }
+  .kpi-value {
+    font-size: 24px;
+  }
+  .page-body {
+    padding: 12px;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Modal com margem lateral mínima
+
+     ────────────────────────────────────────── */
+  .modal-backdrop {
+    padding: 0 8px;
+    align-items: center;
+  }
+  .modal {
+    padding: 16px;
+    max-height: 88vh;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Finance KPI → 2 colunas (mantém legibilidade)
+
+     ────────────────────────────────────────── */
+  .finance-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* ──────────────────────────────────────────
+
+     Balões — quase tela cheia
+
+     ────────────────────────────────────────── */
+  .msg-bubble {
+    max-width: 92%;
+  }
+  .msg-edit-form {
+    max-width: 92%;
+  }
+}
+
+/* ──────────────────────────────────────────
+
+   Ajustes mobile premium — Dashboard e menu de perfil
+
+   ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .main-content {
+    min-width: 0;
+  }
+  .page-body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  .pro-hero {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+  }
+  .dash-greeting-title {
+    font-size: 19px;
+    line-height: 1.2;
+  }
+  .dash-greeting-sub {
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+  .quick-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .quick-actions .btn {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    justify-content: center;
+  }
+  .kpi-grid,
+  .kpi-grid-4 {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+  .kpi-card {
+    padding: 14px;
+  }
+  .kpi-value {
+    font-size: 24px;
+  }
+  .insight-grid,
+  .dash-grid,
+  .dash-charts-grid,
+  .performance-grid,
+  .decision-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  .health-score {
+    align-items: flex-start;
+  }
+  .health-ring {
+    width: 66px;
+    height: 66px;
+  }
+  .health-ring::before {
+    width: 48px;
+    height: 48px;
+  }
+  .health-title {
+    font-size: 13.5px;
+  }
+  .health-sub {
+    font-size: 12px;
+  }
+  .health-list div {
+    padding: 8px 9px;
+  }
+  .activity-list {
+    padding: 8px;
+  }
+  .activity-item {
+    padding: 9px;
+    border-radius: 12px;
+  }
+  .activity-info strong {
+    white-space: normal;
+    line-height: 1.3;
+  }
+  .activity-info span {
+    line-height: 1.35;
+  }
+  .dash-charts-grid .card-body div[style*="height:245px"] {
+    height: 210px !important;
+  }
+  .team-score-item {
+    padding: 9px;
+    align-items: flex-start;
+  }
+  .team-score-item strong {
+    margin-left: auto;
+  }
+  .profile-panel {
+    width: min(260px, calc(100vw - 16px));
+  }
+}
+@media (max-width: 380px) {
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+}

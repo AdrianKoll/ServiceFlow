@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — ServiceFlow Pro{% endblock %}
+{% block content %}
+
+<div class="dash-greeting pro-hero">
+  <div>
+    <h1 class="dash-greeting-title">Olá, {{ current_user_name }}</h1>
+    <p class="dash-greeting-sub">Visão executiva do fluxo operacional, financeiro e produtividade.</p>
+  </div>
+  <div class="quick-actions">
+    <a href="{{ url_for('servicos.servicos') }}" class="btn btn-primary btn-sm">+ Serviço</a>
+    <a href="{{ url_for('clientes.clientes') }}" class="btn btn-secondary btn-sm">+ Cliente</a>
+    <a href="{{ url_for('tarefas.tarefas') }}" class="btn btn-secondary btn-sm">+ Tarefa</a>
+  </div>
+</div>
+
+<div class="kpi-grid kpi-grid-4">
+  <div class="card kpi-card pro-kpi">
+    <div class="kpi-label">Receita do mês <span class="mini-dot success"></span></div>
+    <div class="kpi-value">{{ fmt_brl(income_month) }}</div>
+    <div class="kpi-change kpi-up">Saldo: {{ fmt_brl(balance_month) }}</div>
+  </div>
+  <div class="card kpi-card pro-kpi">
+    <div class="kpi-label">Serviços no mês <span class="mini-dot info"></span></div>
+    <div class="kpi-value">{{ services_month }}</div>
+    <div class="kpi-change {% if service_growth >= 0 %}kpi-up{% else %}kpi-down{% endif %}">{{ service_growth }}% vs mês anterior</div>
+  </div>
+  <div class="card kpi-card pro-kpi">
+    <div class="kpi-label">Conclusão geral <span class="mini-dot primary"></span></div>
+    <div class="kpi-value">{{ completion_rate }}%</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:{{ completion_rate }}%"></div></div>
+  </div>
+  <div class="card kpi-card pro-kpi {% if overdue_services or overdue_tasks %}risk-card{% endif %}">
+    <div class="kpi-label">Atenção operacional <span class="mini-dot danger"></span></div>
+    <div class="kpi-value">{{ overdue_services + overdue_tasks }}</div>
+    <div class="kpi-change {% if overdue_services or overdue_tasks %}kpi-down{% else %}kpi-up{% endif %}">{{ overdue_services }} serviços / {{ overdue_tasks }} tarefas atrasadas</div>
+  </div>
+</div>
+
+<div class="insight-grid">
+  <div class="card insight-card">
+    <div class="card-header">
+      <span class="card-title">Saúde do Negócio</span>
+      <span class="badge badge-active">Em operação</span>
+    </div>
+    <div class="card-body health-panel">
+      <div class="health-score">
+        <div class="health-ring" style="--score:{{ completion_rate }}"><span>{{ completion_rate }}%</span></div>
+        <div>
+          <div class="health-title">Eficiência operacional</div>
+          <div class="health-sub">Baseada em serviços concluídos, pendências e atrasos.</div>
+        </div>
+      </div>
+      <div class="health-list">
+        <div><span>Clientes ativos</span><strong>{{ client_total }}</strong></div>
+        <div><span>Equipe</span><strong>{{ user_total }}</strong></div>
+        <div><span>Tarefas concluídas</span><strong>{{ task_completion_rate }}%</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card insight-card">
+    <div class="card-header">
+      <span class="card-title">Atividade Recente</span>
+      <span class="text-muted-small">últimos registros</span>
+    </div>
+    <div class="activity-list">
+      {% for item in recent_activity %}
+      <div class="activity-item">
+        <div class="activity-icon {{ item.type }}">{% if item.type == 'service' %}S{% elif item.type == 'client' %}C{% elif item.type == 'task' %}T{% else %}R{% endif %}</div>
+        <div class="activity-info">
+          <strong>{{ item.title }}</strong>
+          <span>{{ item.description }} • {{ fmt_date(item.date) }}</span>
+        </div>
+        <span class="badge badge-{{ item.status }}">{{ status_pt.get(item.status, item.status) }}</span>
+      </div>
+      {% else %}
+      <div class="empty-state">Nenhuma atividade registrada.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="dash-charts-grid">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Serviços criados x concluídos</span></div>
+    <div class="card-body" style="padding:12px 16px 16px"><div style="position:relative;height:245px"><canvas id="activityChart"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Receita x Despesas</span></div>
+    <div class="card-body" style="padding:12px 16px 16px"><div style="position:relative;height:245px"><canvas id="financeChart"></canvas></div></div>
+  </div>
+</div>
+
+<div class="dash-grid">
+  <div class="card dash-recent-card">
+    <div class="card-header">
+      <span class="card-title">Serviços Recentes</span>
+      <a href="{{ url_for('servicos.servicos') }}" class="btn btn-ghost btn-sm">Ver todos</a>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>Serviço</th><th class="hide-sm">Cliente</th><th class="hide-sm">Responsável</th><th>Status</th><th class="hide-sm">Valor</th></tr></thead>
+        <tbody>
+          {% for service, client_name, resp_name in recent_services %}
+          <tr>
+            <td><div style="font-weight:500;font-size:13px">{{ service.title }}</div><div style="font-size:11px;color:var(--text-muted)">{{ fmt_date(service.created_at) }}</div></td>
+            <td class="td-muted hide-sm">{{ client_name or '—' }}</td>
+            <td class="td-muted hide-sm">{{ resp_name or '—' }}</td>
+            <td><span class="badge badge-{{ service.status }}">{{ status_pt.get(service.status, service.status) }}</span></td>
+            <td class="hide-sm" style="font-size:13px">{{ fmt_brl(service.value) }}</td>
+          </tr>
+          {% else %}<tr><td colspan="5" class="empty-state">Nenhum serviço cadastrado</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Top desempenho</span>
+      {% if can_access('desempenho') %}<a href="{{ url_for('desempenho.desempenho') }}" class="btn btn-ghost btn-sm">Abrir</a>{% endif %}
+    </div>
+    <div class="team-performance-list">
+      {% for row in team_performance %}
+      <div class="team-score-item">
+        <div class="team-avatar">{{ row.user.name[:2].upper() }}</div>
+        <div class="team-info">
+          <div class="team-name">{{ row.user.name }}</div>
+          <div class="team-tasks">{{ row.task_done }} tarefas • {{ row.services_completed }} serviços</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:{{ row.score }}%"></div></div>
+        </div>
+        <strong>{{ row.score }}%</strong>
+      </div>
+      {% else %}<div class="empty-state">Sem membros cadastrados.</div>{% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  const cs = getComputedStyle(document.documentElement);
+  const get = (v) => cs.getPropertyValue(v).trim();
+  const primary = get('--primary'), success = get('--success'), warning = get('--warning'), danger = get('--danger'), info = get('--info'), border = get('--border'), muted = get('--text-muted'), text = get('--text'), bgCard = get('--bg-card');
+  Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
+  Chart.defaults.font.size = 11.5;
+  const baseTooltip = {backgroundColor:bgCard,borderColor:border,borderWidth:1,titleColor:text,bodyColor:muted,padding:10,cornerRadius:8};
+  const labels = {{ chart_labels | safe }};
+  const created = {{ chart_created | safe }};
+  const completed = {{ chart_completed | safe }};
+  const actCtx = document.getElementById('activityChart');
+  if (actCtx) new Chart(actCtx,{type:'line',data:{labels,datasets:[{label:'Criados',data:created,borderColor:primary,backgroundColor:primary+'22',fill:true,tension:.4,borderWidth:2,pointRadius:3},{label:'Concluídos',data:completed,borderColor:success,backgroundColor:success+'10',fill:false,tension:.4,borderWidth:2,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:muted}},tooltip:baseTooltip},scales:{x:{grid:{display:false},ticks:{color:muted}},y:{beginAtZero:true,grid:{color:border},ticks:{color:muted,precision:0}}}}});
+  const finCtx = document.getElementById('financeChart');
+  if (finCtx) new Chart(finCtx,{type:'bar',data:{labels:{{ finance_labels | safe }},datasets:[{label:'Receita',data:{{ finance_income | safe }},backgroundColor:success+'aa',borderColor:success,borderWidth:1},{label:'Despesas',data:{{ finance_expense | safe }},backgroundColor:danger+'88',borderColor:danger,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:muted}},tooltip:baseTooltip},scales:{x:{grid:{display:false},ticks:{color:muted}},y:{beginAtZero:true,grid:{color:border},ticks:{color:muted}}}}});
+})();
+</script>
+{% endblock %}

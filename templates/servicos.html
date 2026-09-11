@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Serviços — ServiceFlow Pro{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Serviços</div>
+    <div class="page-subtitle">Gerencie todos os serviços</div>
+  </div>
+  <button class="btn btn-primary" data-modal-open="modalNovoServico">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Novo Serviço
+  </button>
+</div>
+
+<!-- Filters -->
+<form method="get" class="filter-bar">
+  <div class="filter-tabs">
+    <a href="{{ url_for('servicos.servicos') }}" class="filter-tab {% if not status_f %}active{% endif %}">Todos</a>
+    <a href="?status=pending{% if search_f %}&search={{ search_f }}{% endif %}" class="filter-tab {% if status_f == 'pending' %}active{% endif %}">Pendentes</a>
+    <a href="?status=in_progress{% if search_f %}&search={{ search_f }}{% endif %}" class="filter-tab {% if status_f == 'in_progress' %}active{% endif %}">Em Andamento</a>
+    <a href="?status=completed{% if search_f %}&search={{ search_f }}{% endif %}" class="filter-tab {% if status_f == 'completed' %}active{% endif %}">Concluídos</a>
+    <a href="?status=cancelled{% if search_f %}&search={{ search_f }}{% endif %}" class="filter-tab {% if status_f == 'cancelled' %}active{% endif %}">Cancelados</a>
+  </div>
+  <div class="search-wrap" style="margin-left:auto">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" name="search" value="{{ search_f }}" placeholder="Buscar serviço..." class="search-input" {% if status_f %}onchange="this.form.action='?status={{ status_f }}&'+this.name+'='+this.value"{% endif %}/>
+    {% if status_f %}<input type="hidden" name="status" value="{{ status_f }}"/>{% endif %}
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Serviço</th>
+          <th class="hide-sm">Cliente</th>
+          <th class="hide-sm">Responsável</th>
+          <th class="hide-sm">Prioridade</th>
+          <th>Status</th>
+          <th class="hide-sm">Valor</th>
+          <th class="hide-sm">Prazo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for service, client_name, resp_name in services %}
+        <tr>
+          <td>
+            <div style="font-weight:500">{{ service.title }}</div>
+            {% if service.description %}<div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{ service.description[:60] }}{% if service.description|length > 60 %}...{% endif %}</div>{% endif %}
+          </td>
+          <td class="td-muted hide-sm">{{ client_name or '—' }}</td>
+          <td class="td-muted hide-sm">{{ resp_name or '—' }}</td>
+          <td class="hide-sm">
+            <span class="priority-dot priority-{{ service.priority }}"></span>
+            {{ priority_pt.get(service.priority, service.priority) }}
+          </td>
+          <td><span class="badge badge-{{ service.status }}">{{ status_pt.get(service.status, service.status) }}</span></td>
+          <td class="hide-sm">{{ fmt_brl(service.value) }}</td>
+          <td class="td-muted hide-sm">{{ fmt_date(service.due_date) }}</td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-ghost btn-icon"
+                data-edit-modal="modalEditServico"
+                data-action-url="{{ url_for('servicos.servico_editar', id=service.id) }}"
+                data-title="{{ service.title }}"
+                data-description="{{ service.description or '' }}"
+                data-status="{{ service.status }}"
+                data-priority="{{ service.priority }}"
+                data-client_id="{{ service.client_id or '' }}"
+                data-responsible_id="{{ service.responsible_id or '' }}"
+                data-value="{{ service.value or '' }}"
+                data-due_date="{{ service.due_date.strftime('%Y-%m-%d') if service.due_date else '' }}"
+                title="Editar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <form id="del-svc-{{ service.id }}" action="{{ url_for('servicos.servico_excluir', id=service.id) }}" method="post" style="display:inline">
+                <button type="button" class="btn btn-ghost btn-icon" style="color:var(--danger)" data-delete-form="del-svc-{{ service.id }}" title="Excluir">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:32px">Nenhum serviço encontrado</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Novo Serviço -->
+<div class="modal-backdrop" id="modalNovoServico">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Novo Serviço</span>
+      <button class="modal-close" data-modal-close="modalNovoServico">✕</button>
+    </div>
+    <form action="{{ url_for('servicos.servico_novo') }}" method="post">
+      <div class="form-group">
+        <label class="form-label">Título *</label>
+        <input type="text" name="title" class="form-control" required placeholder="Nome do serviço"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <textarea name="description" class="form-control" placeholder="Descrição do serviço..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="pending">Pendente</option>
+            <option value="in_progress">Em Andamento</option>
+            <option value="completed">Concluído</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prioridade</label>
+          <select name="priority" class="form-control">
+            <option value="low">Baixa</option>
+            <option value="medium" selected>Média</option>
+            <option value="high">Alta</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cliente</label>
+          <select name="client_id" class="form-control">
+            <option value="">— Selecione —</option>
+            {% for c in clients %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Responsável</label>
+          <select name="responsible_id" class="form-control">
+            <option value="">— Selecione —</option>
+            {% for u in users %}<option value="{{ u.id }}">{{ u.name }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Valor (R$)</label>
+          <input type="number" name="value" class="form-control" step="0.01" min="0" placeholder="0,00"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prazo</label>
+          <input type="date" name="due_date" class="form-control"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="modalNovoServico">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Criar Serviço</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar Serviço -->
+<div class="modal-backdrop" id="modalEditServico">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Editar Serviço</span>
+      <button class="modal-close" data-modal-close="modalEditServico">✕</button>
+    </div>
+    <form action="" method="post" id="editServicoForm">
+      <div class="form-group">
+        <label class="form-label">Título *</label>
+        <input type="text" name="title" class="form-control" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <textarea name="description" class="form-control"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="pending">Pendente</option>
+            <option value="in_progress">Em Andamento</option>
+            <option value="completed">Concluído</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prioridade</label>
+          <select name="priority" class="form-control">
+            <option value="low">Baixa</option>
+            <option value="medium">Média</option>
+            <option value="high">Alta</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cliente</label>
+          <select name="client_id" class="form-control">
+            <option value="">— Selecione —</option>
+            {% for c in clients %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Responsável</label>
+          <select name="responsible_id" class="form-control">
+            <option value="">— Selecione —</option>
+            {% for u in users %}<option value="{{ u.id }}">{{ u.name }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Valor (R$)</label>
+          <input type="number" name="value" class="form-control" step="0.01" min="0"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prazo</label>
+          <input type="date" name="due_date" class="form-control"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="modalEditServico">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

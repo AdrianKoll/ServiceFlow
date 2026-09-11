@@ -1,0 +1,110 @@
+/* ══════════════════════════════════════════
+   MÓDULO: Kanban (Tarefas)
+   Página: /tarefas
+   Contém: colunas do kanban, cards de tarefa
+   e botões de movimentação de status.
+   ══════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────
+
+   Grade de colunas do kanban
+
+   ────────────────────────────────────────── */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+/* ──────────────────────────────────────────
+
+   Coluna individual
+
+   ────────────────────────────────────────── */
+.kanban-col {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.kanban-col-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kanban-col-title {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.kanban-count {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 11px;
+  padding: 1px 7px;
+  color: var(--text-muted);
+}
+
+/* ──────────────────────────────────────────
+
+   Lista de cards dentro da coluna
+
+   ────────────────────────────────────────── */
+.kanban-cards {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 80px;
+}
+
+/* ──────────────────────────────────────────
+
+   Card de tarefa
+
+   ────────────────────────────────────────── */
+.kanban-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.kanban-card:hover {
+  border-color: var(--primary);
+}
+.kanban-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.kanban-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kanban-card-assignee {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ──────────────────────────────────────────
+
+   Botões de mover tarefa entre colunas
+
+   ────────────────────────────────────────── */
+.kanban-move-btns {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+.kanban-move-btns form {
+  display: inline;
+}

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Tarefas — ServiceFlow Pro{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Tarefas</div>
+    <div class="page-subtitle">Quadro Kanban de tarefas</div>
+  </div>
+  <button class="btn btn-primary" data-modal-open="modalNovaTarefa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Nova Tarefa
+  </button>
+</div>
+
+<div class="kanban">
+  {% set cols = [
+    ('todo',       'A Fazer',      '#7d8590', None,          'in_progress'),
+    ('in_progress','Em Andamento', '#58a6ff', 'todo',        'review'),
+    ('review',     'Revisão',      '#6e56cf', 'in_progress', 'done'),
+    ('done',       'Concluído',    '#3fb950', 'review',      None),
+  ] %}
+  {% for status_key, col_label, col_color, prev_status, next_status in cols %}
+  <div class="kanban-col">
+    <div class="kanban-col-header">
+      <div class="kanban-col-title">
+        <span style="width:8px;height:8px;border-radius:50%;background:{{ col_color }};display:inline-block"></span>
+        {{ col_label }}
+      </div>
+      <span class="kanban-count">{{ tasks_by_status[status_key]|length }}</span>
+    </div>
+    <div class="kanban-cards">
+      {% for task in tasks_by_status[status_key] %}
+      <div class="kanban-card">
+        <div class="kanban-card-title">{{ task.title }}</div>
+        {% if task.description %}
+        <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:6px">{{ task.description[:80] }}{% if task.description|length > 80 %}...{% endif %}</div>
+        {% endif %}
+        <div class="kanban-card-meta">
+          <div>
+            <span class="priority-dot priority-{{ task.priority }}"></span>
+            <span style="font-size:11.5px;color:var(--text-muted)">{{ priority_pt.get(task.priority, task.priority) }}</span>
+          </div>
+          {% if task.due_date %}
+          <span style="font-size:11px;color:var(--text-muted)">{{ fmt_date(task.due_date) }}</span>
+          {% endif %}
+        </div>
+        {% if task.assignee %}
+        <div style="font-size:11px;color:var(--text-muted);margin-top:5px">
+          👤 {{ task.assignee.name }}
+        </div>
+        {% endif %}
+        <div class="kanban-move-btns">
+          {% if prev_status %}
+          <form action="{{ url_for('tarefas.tarefa_mover', id=task.id) }}" method="post" style="display:inline">
+            <input type="hidden" name="status" value="{{ prev_status }}"/>
+            <button type="submit" class="btn btn-ghost btn-sm" title="Voltar">◀</button>
+          </form>
+          {% endif %}
+          {% if next_status %}
+          <form action="{{ url_for('tarefas.tarefa_mover', id=task.id) }}" method="post" style="display:inline">
+            <input type="hidden" name="status" value="{{ next_status }}"/>
+            <button type="submit" class="btn btn-ghost btn-sm" title="Avançar">▶</button>
+          </form>
+          {% endif %}
+          <form id="del-task-{{ task.id }}" action="{{ url_for('tarefas.tarefa_excluir', id=task.id) }}" method="post" style="display:inline;margin-left:auto">
+            <button type="button" class="btn btn-ghost btn-sm" style="color:var(--danger)" data-delete-form="del-task-{{ task.id }}">✕</button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <div style="padding:16px;text-align:center;color:var(--text-subtle);font-size:12px;border:1px dashed var(--border);border-radius:var(--radius);margin:4px">
+        Nenhuma tarefa
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Modal Nova Tarefa -->
+<div class="modal-backdrop" id="modalNovaTarefa">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nova Tarefa</span>
+      <button class="modal-close" data-modal-close="modalNovaTarefa">✕</button>
+    </div>
+    <form action="{{ url_for('tarefas.tarefa_nova') }}" method="post">
+      <div class="form-group">
+        <label class="form-label">Título *</label>
+        <input type="text" name="title" class="form-control" required placeholder="Título da tarefa"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <textarea name="description" class="form-control" placeholder="Detalhes da tarefa..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="todo">A Fazer</option>
+            <option value="in_progress">Em Andamento</option>
+            <option value="review">Revisão</option>
+            <option value="done">Concluído</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prioridade</label>
+          <select name="priority" class="form-control">
+            <option value="low">Baixa</option>
+            <option value="medium" selected>Média</option>
+            <option value="high">Alta</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Responsável</label>
+          <select name="assignee_id" class="form-control">
+            <option value="">— Selecione —</option>
+            {% for u in users %}<option value="{{ u.id }}">{{ u.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prazo</label>
+          <input type="date" name="due_date" class="form-control"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Serviço Relacionado</label>
+        <select name="service_id" class="form-control">
+          <option value="">— Opcional —</option>
+          {% for s in services %}<option value="{{ s.id }}">{{ s.title }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="modalNovaTarefa">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Criar Tarefa</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

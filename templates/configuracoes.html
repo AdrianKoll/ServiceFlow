@@ -1,0 +1,604 @@
+{% extends "base.html" %}
+{% block title %}Configurações — ServiceFlow Pro{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Configurações</div>
+    <div class="page-subtitle">Personalize o sistema</div>
+  </div>
+</div>
+
+<div class="config-grid">
+  <!-- Menu -->
+  <div class="config-menu">
+    <button class="config-menu-item active" data-section="secPerfil">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Meu Perfil
+    </button>
+    {% if session.get('user_role') == 'admin' %}
+    <button class="config-menu-item" data-section="secGeral">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Geral
+    </button>
+    {% endif %}
+    <button class="config-menu-item" data-section="secAparencia">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      Aparência
+    </button>
+    <button class="config-menu-item" data-section="secNotificacoes">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      Notificações
+    </button>
+    <button class="config-menu-item" data-section="secSeguranca">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Segurança
+    </button>
+    {% if session.get('user_role') == 'admin' %}
+    <button class="config-menu-item" data-section="secIntegracoes">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      Integrações
+    </button>
+    {% endif %}
+  </div>
+
+  <!-- Content -->
+  <div>
+    <!-- Meu Perfil -->
+    <div class="config-section active" id="secPerfil">
+      <div class="config-section-title">Meu Perfil</div>
+      <div class="config-section-desc">Edite suas informações pessoais e o ícone de perfil</div>
+      <form action="{{ url_for('configuracoes.salvar_perfil') }}" method="post" enctype="multipart/form-data" id="formPerfil">
+        <div class="card" style="padding:20px;margin-bottom:16px">
+
+          {# ── Foto / avatar ── #}
+          <div class="profile-settings-card">
+            <div id="avatarPreview" class="profile-avatar-preview" style="background:{{ avatar_color }}">
+              {% if user_avatar_url %}
+              <img src="{{ user_avatar_url }}" alt="Imagem de perfil" id="avatarImagePreview" class="avatar-img"/>
+              <span id="avatarInitials" style="display:none">{{ user_initials }}</span>
+              {% else %}
+              <img src="" alt="Imagem de perfil" id="avatarImagePreview" class="avatar-img" style="display:none"/>
+              <span id="avatarInitials">{{ user_initials }}</span>
+              {% endif %}
+              <span class="avatar-role-badge">{{ user_role_abbr }}</span>
+            </div>
+            <div class="profile-settings-main">
+              <div style="font-size:13px;font-weight:700;margin-bottom:4px">Imagem de perfil</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Envie uma foto para aparecer no topo, sidebar e menu do usuário. Formatos: PNG, JPG, WEBP ou GIF até 2MB.</div>
+              <div class="profile-upload-actions">
+                <label class="btn btn-secondary btn-sm" for="profileImageInput" style="cursor:pointer">Escolher imagem</label>
+                <input type="file" name="profile_image" id="profileImageInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none"/>
+                {% if current_user and current_user.avatar %}
+                <button type="submit" formaction="{{ url_for('configuracoes.remover_imagem_perfil') }}" formmethod="post" class="btn btn-danger btn-sm">Remover imagem</button>
+                {% endif %}
+              </div>
+              <div id="profileImageName" style="font-size:11px;color:var(--text-muted);margin-top:8px">{% if current_user and current_user.avatar %}Imagem atual carregada{% else %}Nenhuma imagem selecionada{% endif %}</div>
+
+              <div style="height:1px;background:var(--border);margin:16px 0"></div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:6px">Cor do avatar sem foto</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px" id="avatarSwatches">
+                {% for c in ['#6366f1','#6e56cf','#2563eb','#0891b2','#16a34a','#ca8a04','#dc2626','#db2777','#374151','#0f766e'] %}
+                <button type="button" data-acolor="{{ c }}"
+                  style="width:26px;height:26px;border-radius:50%;background:{{ c }};border:3px solid {% if c == avatar_color %}white{% else %}transparent{% endif %};
+                  box-shadow:{% if c == avatar_color %}0 0 0 2px {{ c }}{% else %}none{% endif %};cursor:pointer;outline:none;transition:transform .15s">
+                </button>
+                {% endfor %}
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="color" id="avatarColorPicker" value="{{ avatar_color }}" style="width:32px;height:32px;border:none;background:none;cursor:pointer;padding:0;border-radius:50%"/>
+                <span style="font-size:11px;color:var(--text-muted)">Personalizado</span>
+              </div>
+              <input type="hidden" name="avatar_color" id="hiddenAvatarColor" value="{{ avatar_color }}"/>
+            </div>
+          </div>
+
+          {# ── Dados pessoais ── #}
+          <div class="form-group">
+            <label class="form-label">Nome completo</label>
+            <input type="text" name="name" class="form-control" value="{{ current_user.name if current_user else '' }}" required id="inputNomePerfil"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input type="email" name="email" class="form-control" value="{{ current_user.email if current_user else '' }}"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Perfil de Acesso</label>
+            <input type="text" class="form-control" value="{{ user_role_label }}" readonly
+              style="opacity:.6;cursor:not-allowed" title="O perfil é gerenciado pelo administrador"/>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salvar Perfil
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Geral (somente admin) -->
+    {% if session.get('user_role') == 'admin' %}
+    <div class="config-section" id="secGeral">
+      <div class="config-section-title">Configurações Gerais</div>
+      <div class="config-section-desc">Dados da empresa, identidade operacional e ambiente SaaS</div>
+      <form action="{{ url_for('configuracoes.salvar_geral') }}" method="post">
+        <div class="card" style="padding:20px;margin-bottom:16px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px">
+            <div style="padding:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-hover)">
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Ambiente</div>
+              <div style="font-size:16px;font-weight:700;margin-top:4px">SQLite Teste</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Pronto para validação rápida</div>
+            </div>
+            <div style="padding:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-hover)">
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Arquitetura</div>
+              <div style="font-size:16px;font-weight:700;margin-top:4px">SaaS Modular</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Modules, services, core e migrations</div>
+            </div>
+            <div style="padding:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-hover)">
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Banco</div>
+              <div style="font-size:16px;font-weight:700;margin-top:4px">Alembic</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Schema versionado</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nome da Empresa</label>
+            <input type="text" name="company_name" class="form-control" value="{{ company_settings.get('company_name', 'ServiceFlow Pro') }}" placeholder="Nome da empresa"/>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CNPJ</label>
+              <input type="text" name="cnpj" class="form-control" value="{{ company_settings.get('cnpj', '') }}" placeholder="00.000.000/0001-00"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Telefone</label>
+              <input type="text" name="phone" class="form-control" value="{{ company_settings.get('phone', '') }}" placeholder="(11) 3000-0000"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Endereço</label>
+            <input type="text" name="address" class="form-control" value="{{ company_settings.get('address', '') }}" placeholder="Rua, número, bairro, cidade - UF"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email de Contato</label>
+            <input type="email" name="contact_email" class="form-control" value="{{ company_settings.get('contact_email', '') }}" placeholder="contato@empresa.com"/>
+          </div>
+          <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- Aparência -->
+    <div class="config-section" id="secAparencia">
+      <div class="config-section-title">Aparência</div>
+      <div class="config-section-desc">Personalize o visual do sistema</div>
+
+      {# ── Tema escuro / claro ── #}
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:14px;font-weight:500">Modo {{ 'Escuro' if theme=='dark' else 'Claro' }}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Tema atual da interface</div>
+          </div>
+          <form action="{{ url_for('configuracoes.toggle_theme') }}" method="post">
+            <button type="submit" class="btn btn-secondary btn-sm">
+              {% if theme == 'dark' %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>Mudar para Claro
+              {% else %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>Mudar para Escuro
+              {% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {# ── Cor Principal + Tamanho de Fonte — formulário único ── #}
+      <form action="{{ url_for('configuracoes.salvar_aparencia') }}" method="post" id="formAparencia">
+        <input type="hidden" name="primary_color" id="hiddenColor" value="{{ primary_color }}"/>
+        <input type="hidden" name="font_size"     id="hiddenFont"  value="{{ font_size }}"/>
+
+        {# ── Cor Principal ── #}
+        <div class="card" style="padding:20px;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Cor Principal</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px">Cor de destaque utilizada nos botões, links e elementos ativos</div>
+
+          {# Paleta de presets #}
+          {% set presets = [
+            ('#6366f1','Indigo'),('#6e56cf','Violeta'),('#2563eb','Azul'),
+            ('#0891b2','Ciano'), ('#16a34a','Verde'), ('#ca8a04','Âmbar'),
+            ('#dc2626','Vermelho'),('#db2777','Rosa'),('#374151','Cinza'),
+          ] %}
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px" id="colorSwatches">
+            {% for hex, name in presets %}
+            <button type="button"
+              class="color-swatch {% if hex == primary_color %}selected{% endif %}"
+              data-color="{{ hex }}"
+              title="{{ name }} ({{ hex }})"
+              style="width:32px;height:32px;border-radius:50%;background:{{ hex }};cursor:pointer;
+                     border:3px solid {% if hex == primary_color %}white{% else %}transparent{% endif %};
+                     box-shadow:{% if hex == primary_color %}0 0 0 2px {{ hex }}{% else %}none{% endif %};
+                     transition:transform .15s,box-shadow .15s;outline:none">
+            </button>
+            {% endfor %}
+          </div>
+
+          {# Campo de cor livre #}
+          <div style="display:flex;align-items:center;gap:10px">
+            <label style="font-size:12px;color:var(--text-muted);white-space:nowrap">Cor personalizada:</label>
+            <input type="color" id="colorPicker" value="{{ primary_color }}"
+              style="width:38px;height:38px;border:none;background:none;cursor:pointer;padding:0;border-radius:50%"/>
+            <input type="text" id="colorHex" value="{{ primary_color }}" maxlength="7"
+              style="width:90px;padding:6px 10px;font-size:12px;font-family:monospace;
+                     background:var(--bg-hover);border:1px solid var(--border);border-radius:var(--radius-sm);
+                     color:var(--text)"/>
+            <div id="colorPreview" style="width:32px;height:32px;border-radius:50%;background:{{ primary_color }};
+              border:1px solid var(--border);transition:background .2s"></div>
+          </div>
+        </div>
+
+        {# ── Tamanho de Fonte ── #}
+        <div class="card" style="padding:20px;margin-bottom:20px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Tamanho de Fonte</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px">Tamanho base do texto na interface</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px" id="fontSwatches">
+            {% for px, label in [('12','Pequeno'),('13','Compacto'),('14','Médio'),('15','Confortável'),('16','Grande'),('18','Extra Grande')] %}
+            <button type="button"
+              class="font-swatch {% if px == font_size %}selected{% endif %}"
+              data-size="{{ px }}"
+              style="padding:7px 16px;border-radius:var(--radius-sm);border:2px solid {% if px == font_size %}var(--primary){% else %}var(--border){% endif %};
+                     background:{% if px == font_size %}var(--primary-alpha){% else %}var(--bg-hover){% endif %};
+                     color:{% if px == font_size %}var(--primary){% else %}var(--text-muted){% endif %};
+                     font-size:{{ px }}px;cursor:pointer;transition:all .15s;outline:none">
+              {{ label }}<span style="font-size:10px;opacity:.7;margin-left:4px">({{ px }}px)</span>
+            </button>
+            {% endfor %}
+          </div>
+          <div id="fontPreview" style="padding:10px 14px;border-radius:var(--radius-sm);border:1px dashed var(--border);
+            color:var(--text-muted);font-size:{{ font_size }}px;line-height:1.5;transition:font-size .2s">
+            Preview: "Ordem de serviço #1024 — Tech Solutions" está <strong>Em Andamento</strong> com prioridade <strong>Alta</strong>.
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px">
+          <button type="submit" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salvar Aparência
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnResetAparencia">Redefinir padrão</button>
+          <span id="previewNote" style="font-size:12px;color:var(--text-muted);display:none">
+            — preview ao vivo, clique em Salvar para aplicar permanentemente
+          </span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Notificações -->
+    <div class="config-section" id="secNotificacoes">
+      <div class="config-section-title">Notificações</div>
+      <div class="config-section-desc">Gerencie alertas importantes do fluxo operacional</div>
+      <form action="{{ url_for('configuracoes.salvar_notificacoes') }}" method="post">
+        <div class="card" style="padding:20px">
+          {% set notif_opts = [
+            ('service_created', 'Novos serviços criados', 'Receber alerta ao criar um serviço'),
+            ('service_completed', 'Serviços concluídos', 'Receber alerta ao concluir um serviço'),
+            ('task_assigned', 'Tarefas atribuídas', 'Receber alerta quando uma tarefa for atribuída a você'),
+            ('deadline_soon', 'Prazos próximos', 'Receber alerta 24h antes do prazo'),
+            ('new_messages', 'Novas mensagens', 'Receber alerta de mensagens não lidas'),
+            ('system_updates', 'Atualizações do sistema', 'Receber informações sobre atualizações'),
+          ] %}
+          {% for key, label, desc in notif_opts %}
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);gap:12px">
+            <div>
+              <div style="font-size:13.5px;font-weight:500">{{ label }}</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:1px">{{ desc }}</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" name="notifications" value="{{ key }}" {% if notification_settings.get(key, True) %}checked{% endif %}/>
+              <span class="slider"></span>
+            </label>
+          </div>
+          {% endfor %}
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;flex-wrap:wrap">
+            <div style="font-size:12px;color:var(--text-muted)">As preferências ficam salvas na sessão do ambiente SQLite de teste.</div>
+            <button type="submit" class="btn btn-primary">Salvar Preferências</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Segurança -->
+    <div class="config-section" id="secSeguranca">
+      <div class="config-section-title">Segurança</div>
+      <div class="config-section-desc">Proteja a conta, gere backups, restaure versões anteriores e limpe dados operacionais</div>
+
+      <form action="{{ url_for('configuracoes.alterar_senha') }}" method="post">
+        <div class="card" style="padding:20px;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px">Alteração de senha</div>
+          <div class="form-group">
+            <label class="form-label">Senha Atual</label>
+            <input type="password" name="senha_atual" class="form-control" placeholder="••••••••" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nova Senha</label>
+            <input type="password" name="nova_senha" class="form-control" placeholder="••••••••" required minlength="6"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar Nova Senha</label>
+            <input type="password" name="confirmar_senha" class="form-control" placeholder="••••••••" required minlength="6"/>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Alterar Senha
+          </button>
+        </div>
+      </form>
+
+      {% if session.get('user_role') == 'admin' %}
+      <div class="card" style="padding:20px;margin-bottom:16px;border:1px solid var(--border)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px">
+          <div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">Backup do sistema</div>
+            <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5">Baixe uma cópia integral do banco SQLite. O sistema também cria um backup automático diário quando a tela de configurações é acessada.</div>
+          </div>
+          <form action="{{ url_for('configuracoes.baixar_backup') }}" method="post" style="margin:0">
+            <button type="submit" class="btn btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Gerar Backup
+            </button>
+          </form>
+        </div>
+
+        {% if backup_error %}
+        <div style="padding:10px 12px;border-radius:var(--radius-sm);background:rgba(239,68,68,.12);color:#ef4444;font-size:12px;margin-bottom:12px">{{ backup_error }}</div>
+        {% endif %}
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px">
+          <div style="padding:12px;border-radius:var(--radius-sm);background:var(--bg-hover);border:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Backups recentes</div>
+            <div style="font-size:22px;font-weight:800;margin-top:4px">{{ backups|length }}</div>
+          </div>
+          <div style="padding:12px;border-radius:var(--radius-sm);background:var(--bg-hover);border:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Automático</div>
+            <div style="font-size:13px;font-weight:700;margin-top:8px">Diário</div>
+          </div>
+        </div>
+
+        {% if backups %}
+        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+          {% for item in backups %}
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:{% if not loop.last %}1px solid var(--border){% else %}0{% endif %}">
+            <div style="min-width:0">
+              <div style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.name }}</div>
+              <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px">{{ item.kind }} • {{ item.size_kb }} KB</div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);white-space:nowrap">{{ fmt_datetime(item.created_at) }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="font-size:12px;color:var(--text-muted);padding:10px 0">Nenhum backup encontrado ainda.</div>
+        {% endif %}
+      </div>
+
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">Restaurar backup</div>
+        <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5;margin-bottom:14px">Envie um ZIP gerado pelo ServiceFlow. Antes de substituir o banco atual, o sistema cria um backup preventivo.</div>
+        <form action="{{ url_for('configuracoes.restaurar_backup') }}" method="post" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <input type="file" name="backup_file" accept=".zip" class="form-control" required style="max-width:360px"/>
+          <button type="submit" class="btn btn-secondary">Restaurar Backup</button>
+        </form>
+      </div>
+
+      <div class="card" style="padding:20px;border:1px solid rgba(239,68,68,.35);background:linear-gradient(135deg,rgba(239,68,68,.08),transparent)">
+        <div style="font-size:14px;font-weight:800;color:#ef4444;margin-bottom:4px">Resetar dados operacionais</div>
+        <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5;margin-bottom:14px">Remove clientes, serviços, tarefas, agenda, financeiro, mensagens, notificações e usuários extras. A conta admin atual é preservada e um backup é criado antes do reset.</div>
+        <form action="{{ url_for('configuracoes.resetar_dados') }}" method="post" onsubmit="return confirm('Tem certeza que deseja resetar os dados operacionais? Um backup será criado antes da limpeza.');">
+          <div class="form-group">
+            <label class="form-label">Digite RESETAR para confirmar</label>
+            <input type="text" name="confirmacao_reset" class="form-control" placeholder="RESETAR" autocomplete="off" required/>
+          </div>
+          <button type="submit" class="btn btn-danger">Resetar Dados</button>
+        </form>
+      </div>
+      {% else %}
+      <div class="card" style="padding:20px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Backup e reset</div>
+        <div style="font-size:12.5px;color:var(--text-muted)">Disponível apenas para administradores.</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Integrações (somente admin) -->
+    {% if session.get('user_role') == 'admin' %}
+    <div class="config-section" id="secIntegracoes">
+      <div class="config-section-title">Integrações</div>
+      <div class="config-section-desc">Conecte o ServiceFlow com outras ferramentas e acompanhe o status de cada conexão</div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">
+        <div class="card" style="padding:16px">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Conectadas</div>
+          <div style="font-size:24px;font-weight:800;margin-top:4px">{{ integrations | selectattr('connected') | list | length }}</div>
+        </div>
+        <div class="card" style="padding:16px">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Disponíveis</div>
+          <div style="font-size:24px;font-weight:800;margin-top:4px">{{ integrations | length }}</div>
+        </div>
+        <div class="card" style="padding:16px">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Prioridade</div>
+          <div style="font-size:16px;font-weight:700;margin-top:7px">WhatsApp + Pagamentos</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:20px">
+        {% for item in integrations %}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:14px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:12px;min-width:240px;flex:1">
+            <div style="width:38px;height:38px;border-radius:10px;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">{{ item.icon }}</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <div style="font-size:13.5px;font-weight:600">{{ item.name }}</div>
+                <span style="font-size:10px;padding:3px 7px;border-radius:999px;background:{% if item.connected %}rgba(34,197,94,.14){% else %}var(--bg-hover){% endif %};color:{% if item.connected %}#22c55e{% else %}var(--text-muted){% endif %};border:1px solid var(--border)">
+                  {% if item.connected %}Conectado{% else %}{{ item.stage }}{% endif %}
+                </span>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">{{ item.desc }}</div>
+            </div>
+          </div>
+          <form action="{{ url_for('configuracoes.alternar_integracao', slug=item.slug) }}" method="post" style="margin:0">
+            <button type="submit" class="btn {% if item.connected %}btn-danger btn-sm{% else %}btn-secondary btn-sm{% endif %}">
+              {% if item.connected %}Desconectar{% else %}Conectar{% endif %}
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  function darkenHex(hex, amt) {
+    var h = hex.replace('#','');
+    var r = Math.max(0, Math.round(parseInt(h.slice(0,2),16)*(1-amt)));
+    var g = Math.max(0, Math.round(parseInt(h.slice(2,4),16)*(1-amt)));
+    var b = Math.max(0, Math.round(parseInt(h.slice(4,6),16)*(1-amt)));
+    return '#'+[r,g,b].map(function(v){return v.toString(16).padStart(2,'0')}).join('');
+  }
+  function hexAlpha(hex, a) {
+    var h = hex.replace('#','');
+    var r = parseInt(h.slice(0,2),16);
+    var g = parseInt(h.slice(2,4),16);
+    var b = parseInt(h.slice(4,6),16);
+    return 'rgba('+r+','+g+','+b+','+a+')';
+  }
+  function isValidHex(v) { return /^#([0-9a-fA-F]{3}){1,2}$/.test(v); }
+
+  function applyColorPreview(hex) {
+    if (!isValidHex(hex)) return;
+    var root = document.documentElement;
+    root.style.setProperty('--primary',       hex);
+    root.style.setProperty('--primary-hover', darkenHex(hex, 0.12));
+    root.style.setProperty('--primary-alpha', hexAlpha(hex, 0.15));
+    document.getElementById('colorPreview').style.background = hex;
+    document.getElementById('colorHex').value    = hex;
+    document.getElementById('colorPicker').value = hex;
+    document.getElementById('hiddenColor').value = hex;
+    document.querySelectorAll('.color-swatch').forEach(function(s){
+      var isThis = s.dataset.color === hex;
+      s.style.border    = isThis ? '3px solid white' : '3px solid transparent';
+      s.style.boxShadow = isThis ? '0 0 0 2px '+hex  : 'none';
+      s.style.transform = isThis ? 'scale(1.15)'     : '';
+    });
+    document.getElementById('previewNote').style.display = 'inline';
+  }
+
+  function applyFontPreview(px) {
+    document.documentElement.style.fontSize = px+'px';
+    document.getElementById('fontPreview').style.fontSize = px+'px';
+    document.getElementById('hiddenFont').value = px;
+    document.querySelectorAll('.font-swatch').forEach(function(b){
+      var isThis = b.dataset.size === String(px);
+      b.style.border     = isThis ? '2px solid var(--primary)' : '2px solid var(--border)';
+      b.style.background = isThis ? 'var(--primary-alpha)'     : 'var(--bg-hover)';
+      b.style.color      = isThis ? 'var(--primary)'           : 'var(--text-muted)';
+    });
+    document.getElementById('previewNote').style.display = 'inline';
+  }
+
+  document.querySelectorAll('.color-swatch').forEach(function(btn){
+    btn.addEventListener('click', function(){ applyColorPreview(btn.dataset.color); });
+    btn.addEventListener('mouseenter', function(){ if (btn.dataset.color !== document.getElementById('hiddenColor').value) btn.style.transform='scale(1.1)'; });
+    btn.addEventListener('mouseleave', function(){ if (btn.dataset.color !== document.getElementById('hiddenColor').value) btn.style.transform=''; });
+  });
+
+  var picker = document.getElementById('colorPicker');
+  if (picker) picker.addEventListener('input', function(){ applyColorPreview(picker.value); });
+
+  var hexInput = document.getElementById('colorHex');
+  if (hexInput) {
+    hexInput.addEventListener('input', function(){
+      var v = hexInput.value.trim();
+      if (!v.startsWith('#')) v = '#'+v;
+      if (isValidHex(v)) applyColorPreview(v);
+    });
+  }
+
+  document.querySelectorAll('.font-swatch').forEach(function(btn){
+    btn.addEventListener('click', function(){ applyFontPreview(btn.dataset.size); });
+  });
+
+  var btnReset = document.getElementById('btnResetAparencia');
+  if (btnReset) {
+    btnReset.addEventListener('click', function(){
+      applyColorPreview('#6366f1');
+      applyFontPreview('14');
+    });
+  }
+
+  /* ── Avatar color swatches ── */
+  function applyAvatarColor(c) {
+    document.getElementById('avatarPreview').style.background = c;
+    document.getElementById('hiddenAvatarColor').value = c;
+    document.getElementById('avatarColorPicker').value = c;
+    document.querySelectorAll('[data-acolor]').forEach(function(b){
+      var isThis = b.dataset.acolor === c;
+      b.style.border    = isThis ? '3px solid white' : '3px solid transparent';
+      b.style.boxShadow = isThis ? '0 0 0 2px '+c    : 'none';
+      b.style.transform = isThis ? 'scale(1.15)'     : '';
+    });
+  }
+  document.querySelectorAll('[data-acolor]').forEach(function(b){
+    b.addEventListener('click', function(){ applyAvatarColor(b.dataset.acolor); });
+  });
+  var acp = document.getElementById('avatarColorPicker');
+  if (acp) acp.addEventListener('input', function(){ applyAvatarColor(acp.value); });
+
+  /* ── Nome → iniciais ao vivo ── */
+  var inputNome = document.getElementById('inputNomePerfil');
+  if (inputNome) {
+    inputNome.addEventListener('input', function(){
+      var parts = inputNome.value.trim().split(/\s+/);
+      var initials = parts.length >= 2
+        ? (parts[0][0] + parts[1][0]).toUpperCase()
+        : (parts[0] || '').slice(0,2).toUpperCase() || 'SF';
+      var el = document.getElementById('avatarInitials');
+      if (el) el.textContent = initials;
+    });
+  }
+
+
+  /* ── Preview da imagem de perfil ── */
+  var profileInput = document.getElementById('profileImageInput');
+  if (profileInput) {
+    profileInput.addEventListener('change', function(){
+      var file = profileInput.files && profileInput.files[0];
+      var nameEl = document.getElementById('profileImageName');
+      if (!file) return;
+      if (nameEl) nameEl.textContent = file.name;
+      var img = document.getElementById('avatarImagePreview');
+      var initials = document.getElementById('avatarInitials');
+      if (img && file.type && file.type.indexOf('image/') === 0) {
+        img.src = URL.createObjectURL(file);
+        img.style.display = 'block';
+        if (initials) initials.style.display = 'none';
+      }
+    });
+  }
+
+  /* ── Navegação por URL ?tab=X ── */
+  var tabParam = new URLSearchParams(window.location.search).get('tab');
+  if (tabParam) {
+    var secMap = { perfil: 'secPerfil', aparencia: 'secAparencia', geral: 'secGeral',
+                   notificacoes: 'secNotificacoes', seguranca: 'secSeguranca', integracoes: 'secIntegracoes' };
+    var secId = secMap[tabParam];
+    if (secId) {
+      var btnTab = document.querySelector('.config-menu-item[data-section="'+secId+'"]');
+      if (btnTab) setTimeout(function(){ btnTab.click(); }, 50);
+    }
+  }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Portal do Cliente — ServiceFlow Pro{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Portal do Cliente</div>
+    <div class="page-subtitle">
+      {% if client %}Olá, {{ client.name }}! Acompanhe seus serviços.{% else %}Área do cliente{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Cards de resumo -->
+<div class="stats-grid" style="margin-bottom:24px">
+  <div class="stat-card">
+    <div class="stat-label">Total de Serviços</div>
+    <div class="stat-value">{{ total }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Pendentes</div>
+    <div class="stat-value" style="color:var(--warning)">{{ pending }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Em Andamento</div>
+    <div class="stat-value" style="color:var(--primary)">{{ inprog }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Concluídos</div>
+    <div class="stat-value" style="color:var(--success)">{{ done }}</div>
+  </div>
+</div>
+
+<!-- Lista de serviços -->
+<div class="card">
+  <div class="card-header" style="padding:16px 20px;border-bottom:1px solid var(--border)">
+    <div style="font-size:15px;font-weight:600">Meus Serviços</div>
+  </div>
+  {% if services %}
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Serviço</th>
+          <th>Status</th>
+          <th>Prioridade</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in services %}
+        <tr>
+          <td>
+            <div style="font-weight:500">{{ s.title }}</div>
+            {% if s.description %}<div style="font-size:12px;color:var(--text-muted);margin-top:2px">{{ s.description[:80] }}{% if s.description|length > 80 %}…{% endif %}</div>{% endif %}
+          </td>
+          <td>
+            {% set sc = {'pending':'warning','in_progress':'primary','completed':'success','cancelled':'danger'} %}
+            {% set sl = {'pending':'Pendente','in_progress':'Em Andamento','completed':'Concluído','cancelled':'Cancelado'} %}
+            <span class="badge badge-{{ sc.get(s.status,'secondary') }}">{{ sl.get(s.status, s.status) }}</span>
+          </td>
+          <td>
+            {% set pc = {'high':'danger','medium':'warning','low':'success'} %}
+            {% set pl = {'high':'Alta','medium':'Média','low':'Baixa'} %}
+            <span class="badge badge-{{ pc.get(s.priority,'secondary') }}">{{ pl.get(s.priority, s.priority) }}</span>
+          </td>
+          <td style="color:var(--text-muted);font-size:13px">{{ s.created_at.strftime('%d/%m/%Y') if s.created_at else '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="padding:48px;text-align:center;color:var(--text-muted)">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px;opacity:.4"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    <div style="font-size:14px">Nenhum serviço encontrado</div>
+    <div style="font-size:12px;margin-top:4px">Entre em contato para solicitar um serviço.</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Variáveis de ambiente e credenciais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Banco/local runtime
+instance/*
+!instance/.gitkeep
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# Backups do sistema
+backups/
+*.sql
+*.bak
+
+# Uploads locais gerados em execução
+static/uploads/*
+!static/uploads/.gitkeep
+!static/uploads/profiles/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# IDE/Sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Pacotes/artefatos gerados
+*.zip
+*.tar
+*.gz

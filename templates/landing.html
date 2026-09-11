@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="{{ session.get('theme','dark') }}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ServiceFlow Pro — Gestão de serviços em um só lugar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}"/>
+</head>
+<body class="public-page">
+  <header class="public-nav">
+    <a href="{{ url_for('public.landing') }}" class="public-logo" aria-label="ServiceFlow Pro">
+      <span class="public-logo-icon">SF</span>
+      <span>Service<span>Flow</span> Pro</span>
+    </a>
+    <nav class="public-links">
+      <a href="#recursos">Recursos</a>
+      <a href="#para-quem">Para quem serve</a>
+      <a href="{{ url_for('public.planos') }}">Planos</a>
+      <a href="{{ url_for('auth.login') }}" class="public-btn public-btn-ghost">Entrar</a>
+      <a href="{{ url_for('auth.cadastro') }}" class="public-btn public-btn-primary">Criar conta</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-badge">SaaS para operação, equipe e serviços</div>
+        <h1>Controle sua empresa com visão de gestão, não apenas com cadastros.</h1>
+        <p>ServiceFlow Pro centraliza clientes, serviços, tarefas, equipe, financeiro, mensagens e relatórios em uma plataforma moderna para pequenas empresas e operações técnicas.</p>
+        <div class="hero-actions">
+          <a href="{{ url_for('auth.login') }}" class="public-btn public-btn-primary public-btn-lg">Entrar no sistema</a>
+          <a href="{{ url_for('public.planos') }}" class="public-btn public-btn-ghost public-btn-lg">Ver planos</a>
+        </div>
+        <div class="hero-trust">
+          <span>✓ Permissões por perfil</span>
+          <span>✓ Dashboard gerencial</span>
+          <span>✓ Pronto para integrações</span>
+        </div>
+      </div>
+      <div class="hero-preview" aria-label="Prévia do dashboard ServiceFlow">
+        <div class="preview-topbar">
+          <span></span><span></span><span></span>
+          <strong>Dashboard operacional</strong>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-card big"><small>Receita mensal</small><strong>R$ 18.420</strong><em>+18% vs mês anterior</em></div>
+          <div class="preview-card"><small>Serviços ativos</small><strong>42</strong></div>
+          <div class="preview-card"><small>Eficiência</small><strong>87%</strong></div>
+          <div class="preview-chart"><span style="height:45%"></span><span style="height:68%"></span><span style="height:54%"></span><span style="height:82%"></span><span style="height:72%"></span></div>
+          <div class="preview-list"><b>Atividade recente</b><p>João concluiu manutenção preventiva</p><p>Maria cadastrou novo cliente</p><p>Financeiro registrou entrada</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="recursos">
+      <div class="section-head">
+        <span class="section-kicker">Recursos</span>
+        <h2>O que o ServiceFlow entrega</h2>
+        <p>Uma base completa para operar, acompanhar e tomar decisões com mais clareza.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card"><span>📊</span><h3>Dashboard inteligente</h3><p>Indicadores de serviços, receita, atrasos, desempenho e atividade recente.</p></article>
+        <article class="feature-card"><span>🧰</span><h3>Gestão de serviços</h3><p>Controle status, responsável, prioridade, cliente e histórico operacional.</p></article>
+        <article class="feature-card"><span>👥</span><h3>Equipe e permissões</h3><p>Perfis para administrador, gerente, técnico, vendas e cliente.</p></article>
+        <article class="feature-card"><span>💬</span><h3>Mensagens internas</h3><p>Comunicação por conversas, edição e exclusão controlada por usuário.</p></article>
+        <article class="feature-card"><span>💰</span><h3>Financeiro</h3><p>Entradas, saídas, relatórios e visão mensal para controle de caixa.</p></article>
+        <article class="feature-card"><span>📈</span><h3>Relatórios e desempenho</h3><p>Ranking de equipe, produtividade e saúde operacional do negócio.</p></article>
+      </div>
+    </section>
+
+    <section class="section split-section" id="para-quem">
+      <div>
+        <span class="section-kicker">Para quem serve</span>
+        <h2>Feito para empresas que dependem de execução diária.</h2>
+        <p>Ideal para assistência técnica, manutenção, pequenas operações, equipes de campo, agências, prestadores de serviço e negócios que precisam organizar demanda, atendimento e dinheiro.</p>
+      </div>
+      <div class="audience-list">
+        <div><strong>Assistência técnica</strong><span>Ordem de serviço, técnico responsável e status.</span></div>
+        <div><strong>Prestadores de serviço</strong><span>Clientes, agenda, tarefas e financeiro integrados.</span></div>
+        <div><strong>Pequenas empresas</strong><span>Controle de equipe, relatórios e visão gerencial.</span></div>
+      </div>
+    </section>
+
+    <section class="section pricing-snapshot">
+      <div class="section-head">
+        <span class="section-kicker">Planos</span>
+        <h2>Modelo SaaS com planos simples</h2>
+        <p>Valores demonstrativos para apresentação. A cobrança real pode ser integrada depois.</p>
+      </div>
+      <div class="plans-grid compact">
+        {% for plan in plans %}
+        <article class="plan-card {% if plan['slug'] == 'pro' %}highlight{% endif %}">
+          <span class="plan-tag">{{ plan['tag'] }}</span>
+          <h3>{{ plan['name'] }}</h3>
+          <div class="plan-price">{{ plan['price_label'] }}</div>
+          <p>{{ plan['description'] }}</p>
+          <a href="{{ url_for('public.pagamento_demo', plano=plan['slug']) }}" class="public-btn {% if plan['slug'] == 'pro' %}public-btn-primary{% else %}public-btn-ghost{% endif %}">Escolher plano</a>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+  <footer class="public-footer">
+    <span>ServiceFlow Pro</span>
+    <span>Modelo demonstrativo de SaaS — pronto para integração de pagamento real.</span>
+  </footer>
+</body>
+</html>

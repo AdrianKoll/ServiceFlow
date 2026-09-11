@@ -1,0 +1,310 @@
+/* ══════════════════════════════════════════
+   TOPBAR — Header, busca, notificações e perfil
+   Contém apenas regras do topo da aplicação.
+   ══════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────
+   Header fixo no topo
+   ────────────────────────────────────────── */
+.header {
+  height: var(--header-h);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px 0 12px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.header-menu-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+}
+.header-menu-btn:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+/* ──────────────────────────────────────────
+
+   Campo de busca global
+
+   ────────────────────────────────────────── */
+.header-search {
+  flex: 1;
+  max-width: 400px;
+  position: relative;
+}
+.header-search input {
+  width: 100%;
+  padding: 7px 12px 7px 36px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  transition: border-color 0.15s;
+}
+.header-search input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.header-search input::placeholder {
+  color: var(--text-subtle);
+}
+.header-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  width: 14px;
+  height: 14px;
+}
+
+/* ──────────────────────────────────────────
+
+   Ações do header — notificações, tema, perfil
+
+   ────────────────────────────────────────── */
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.header-btn {
+  background: none;
+  border: none;
+  padding: 7px;
+  border-radius: 50%;
+  color: var(--text-muted);
+  display: flex;
+  position: relative;
+}
+.header-btn:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+.header-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ──────────────────────────────────────────
+
+   Badge de notificações não lidas
+
+   ────────────────────────────────────────── */
+.notif-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 50%;
+  border: 2px solid var(--bg-card);
+  font-size: 9px;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ──────────────────────────────────────────
+
+   Botão de perfil
+
+   ────────────────────────────────────────── */
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.profile-btn:hover {
+  background: var(--bg-hover);
+}
+.profile-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.profile-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.profile-chevron {
+  color: var(--text-muted);
+  width: 14px;
+  height: 14px;
+}
+
+/* ──────────────────────────────────────────
+   Painéis dropdown (notificações + perfil)
+   Para adicionar novo painel: crie uma div
+   com .dropdown-panel e abra via JS.
+   ────────────────────────────────────────── */
+.dropdown-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 300px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  z-index: 100;
+  display: none;
+}
+.dropdown-panel.open {
+  display: block;
+}
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+}
+.dropdown-header a {
+  font-size: 11px;
+  color: var(--primary);
+  font-weight: 400;
+}
+.dropdown-footer {
+  padding: 8px 16px;
+  text-align: center;
+}
+.dropdown-footer a {
+  font-size: 12px;
+  color: var(--primary);
+}
+
+/* ──────────────────────────────────────────
+
+   Item de notificação
+
+   ────────────────────────────────────────── */
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.notif-item:hover {
+  background: var(--bg-hover);
+}
+.notif-item.unread {
+  background: rgba(99, 102, 241, 0.06);
+}
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.notif-dot.info {
+  background: var(--info);
+}
+.notif-dot.success {
+  background: var(--success);
+}
+.notif-dot.warning {
+  background: var(--warning);
+}
+.notif-dot.error {
+  background: var(--danger);
+}
+.notif-title {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.notif-content {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+.notif-time {
+  font-size: 10.5px;
+  color: var(--text-subtle);
+  margin-top: 2px;
+}
+
+/* ──────────────────────────────────────────
+
+   Painel de perfil
+
+   ────────────────────────────────────────── */
+.profile-panel {
+  width: 220px;
+}
+.profile-panel-info {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-panel-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.profile-panel-role {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.profile-panel-email {
+  font-size: 11px;
+  color: var(--text-subtle);
+}
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+}
+.profile-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.profile-menu-item.danger {
+  color: var(--danger);
+}
+.profile-menu-item.danger:hover {
+  background: rgba(248, 81, 73, 0.1);
+}
+.profile-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}

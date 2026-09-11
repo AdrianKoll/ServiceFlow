@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="{{ theme }}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}ServiceFlow Pro{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <!-- ─── Folhas de estilo organizadas por camada ───────────────────
+       Ordem de carregamento:
+       1. variables  → tokens globais de cor, fonte, espaçamento, borda e sombra
+       2. base       → reset, tipografia e elementos HTML globais
+       3. layout     → estrutura raiz e mensagens flash
+       4. sidebar    → navegação lateral e overlay mobile
+       5. topbar     → header, busca, notificações e perfil
+       6. components → componentes reutilizáveis
+       7. dashboard/modules → estilos específicos de páginas
+       8. responsive → breakpoints finais
+       ─────────────────────────────────────────────────────────── -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/topbar.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/kanban.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/agenda.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/financeiro.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/mensagens.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/relatorios.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/configuracoes.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}"/>
+  <style>
+    .pos-relative { position: relative; }
+    .notif-rel { position: relative; }
+    /* ── Personalização dinâmica (cor + fonte) ─────────────────────── */
+    :root {
+      --primary:       {{ primary_color }};
+      --primary-hover: {{ primary_hover }};
+      --primary-fg:    #ffffff;
+      --primary-alpha: {{ primary_alpha }};
+      --base-font-size: {{ font_size }}px;
+    }
+    .light {
+      --primary:       {{ primary_color }};
+      --primary-hover: {{ primary_hover }};
+      --primary-alpha: {{ primary_alpha }};
+    }
+    html, body { font-size: {{ font_size }}px; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">SF</div>
+        <span class="sidebar-logo-text">Service<span>Flow</span></span>
+      </div>
+      <button class="sidebar-close" id="sidebarClose">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group">
+        <div class="nav-group-label">Principal</div>
+        <a href="{{ url_for('main.dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="{{ url_for('servicos.servicos') }}" class="nav-item {% if request.endpoint and 'servico' in request.endpoint %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          Serviços
+        </a>
+        <a href="{{ url_for('tarefas.tarefas') }}" class="nav-item {% if request.endpoint and 'tarefa' in request.endpoint %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          Tarefas
+        </a>
+        <a href="{{ url_for('agenda.agenda') }}" class="nav-item {% if request.endpoint and 'evento' in request.endpoint or request.endpoint == 'agenda' %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Agenda
+        </a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Gestão</div>
+        <a href="{{ url_for('clientes.clientes') }}" class="nav-item {% if request.endpoint and 'cliente' in request.endpoint %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Clientes
+        </a>
+        <a href="{{ url_for('equipe.equipe') }}" class="nav-item {% if request.endpoint and 'equipe' in request.endpoint %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Equipe
+        </a>
+        <a href="{% if user_has_feature('desempenho') %}{{ url_for('desempenho.desempenho') }}{% else %}{{ url_for('assinatura.assinatura', blocked='desempenho') }}{% endif %}" class="nav-item {% if request.endpoint and 'desempenho' in request.endpoint %}active{% endif %} {% if not user_has_feature('desempenho') %}locked{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-7"/></svg>
+          Desempenho {% if not user_has_feature('desempenho') %}<span class="nav-lock-badge">PRO</span>{% endif %}
+        </a>
+        <a href="{% if user_has_feature('financeiro') %}{{ url_for('financeiro.financeiro') }}{% else %}{{ url_for('assinatura.assinatura', blocked='financeiro') }}{% endif %}" class="nav-item {% if request.endpoint and ('financeiro' in request.endpoint or 'transacao' in request.endpoint) %}active{% endif %} {% if not user_has_feature('financeiro') %}locked{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Financeiro {% if not user_has_feature('financeiro') %}<span class="nav-lock-badge">PRO</span>{% endif %}
+        </a>
+        <a href="{% if user_has_feature('relatorios') %}{{ url_for('relatorios.relatorios') }}{% else %}{{ url_for('assinatura.assinatura', blocked='relatorios') }}{% endif %}" class="nav-item {% if request.endpoint == 'relatorios' %}active{% endif %} {% if not user_has_feature('relatorios') %}locked{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Relatórios {% if not user_has_feature('relatorios') %}<span class="nav-lock-badge">PRO</span>{% endif %}
+        </a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Comunicação</div>
+        <a href="{{ url_for('mensagens.mensagens') }}" class="nav-item {% if request.endpoint and 'mensagem' in request.endpoint %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Mensagens
+        </a>
+        <a href="{{ url_for('assinatura.assinatura') }}" class="nav-item {% if request.endpoint and 'assinatura' in request.endpoint %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
+          Assinatura
+        </a>
+        <a href="{{ url_for('configuracoes.configuracoes') }}" class="nav-item {% if request.endpoint == 'configuracoes' %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Configurações
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-plan-card">
+        <div class="sidebar-plan-top"><span>Plano atual</span><strong>{{ current_plan['name'] }}</strong></div>
+        <div class="sidebar-plan-meter"><span style="width:{% if current_plan['slug'] == 'pro' %}100{% else %}45{% endif %}%"></span></div>
+        <a href="{{ url_for('assinatura.assinatura') }}" class="sidebar-upgrade-btn">{% if current_plan['slug'] == 'pro' %}Gerenciar assinatura{% else %}Fazer upgrade{% endif %}</a>
+      </div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" style="background:{{ avatar_color }}">{% if user_avatar_url %}<img src="{{ user_avatar_url }}" alt="Avatar" class="avatar-img"/>{% else %}{{ user_initials }}{% endif %}</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">{{ current_user.name.split()[0] if current_user else 'Usuário' }}</div>
+          <div class="sidebar-user-role">{{ user_role_label }}</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <button class="header-menu-btn" id="menuBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="header-search">
+        <svg class="header-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Buscar..." id="globalSearch"/>
+      </div>
+      <div class="header-actions">
+        <!-- Theme Toggle -->
+        <form action="{{ url_for('configuracoes.toggle_theme') }}" method="post" style="display:inline">
+          <button type="submit" class="header-btn" title="Alternar tema">
+            {% if theme == 'dark' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            {% else %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            {% endif %}
+          </button>
+        </form>
+        <!-- Notifications -->
+        <div class="notif-rel pos-relative">
+          <button class="header-btn" data-dropdown="notifPanel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            {% if unread_count > 0 %}
+            <span class="notif-badge">{{ unread_count if unread_count < 10 else '9+' }}</span>
+            {% endif %}
+          </button>
+          <div class="dropdown-panel" id="notifPanel">
+            <div class="dropdown-header">
+              <span>Notificações {% if unread_count > 0 %}<span style="color:var(--primary)">({{ unread_count }})</span>{% endif %}</span>
+              {% if unread_count > 0 %}
+              <form action="{{ url_for('notifications.notifications_mark_all') }}" method="post" style="display:inline">
+                <button type="submit" style="background:none;border:none;color:var(--primary);font-size:11px;cursor:pointer">Marcar todas lidas</button>
+              </form>
+              {% endif %}
+            </div>
+            {% for n in notifications[:8] %}
+            <div class="notif-item {% if not n.read %}unread{% endif %}">
+              <div class="notif-dot {{ n.type }}"></div>
+              <div style="flex:1;min-width:0">
+                <div class="notif-title">{{ n.title }}</div>
+                <div class="notif-content">{{ n.content }}</div>
+                <div class="notif-time">{{ fmt_datetime(n.created_at) }}</div>
+              </div>
+              {% if not n.read %}
+              <form action="{{ url_for('notifications.notification_read', id=n.id) }}" method="post">
+                <button type="submit" class="btn-ghost" title="Marcar lida" style="padding:2px">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+            {% else %}
+            <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">Nenhuma notificação</div>
+            {% endfor %}
+          </div>
+        </div>
+        <!-- Profile -->
+        <div class="pos-relative">
+          <button class="profile-btn" data-dropdown="profilePanel">
+            <div class="profile-avatar" style="background:{{ avatar_color }};position:relative">
+              {% if user_avatar_url %}<img src="{{ user_avatar_url }}" alt="Avatar" class="avatar-img"/>{% else %}{{ user_initials }}{% endif %}
+              <span style="position:absolute;bottom:-4px;right:-6px;background:var(--bg-card);border:1px solid var(--border);border-radius:4px;font-size:9px;font-weight:700;color:var(--text-muted);padding:1px 3px;line-height:1.2;letter-spacing:.3px">{{ user_role_abbr }}</span>
+            </div>
+            <span class="profile-name">{{ current_user.name.split()[0] if current_user else 'Usuário' }}</span>
+            <svg class="profile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-panel profile-panel" id="profilePanel">
+            <div class="profile-panel-info">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <div style="width:38px;height:38px;border-radius:50%;background:{{ avatar_color }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden">{% if user_avatar_url %}<img src="{{ user_avatar_url }}" alt="Avatar" class="avatar-img"/>{% else %}{{ user_initials }}{% endif %}</div>
+                <div>
+                  <div class="profile-panel-name">{{ current_user.name if current_user else 'Usuário' }}</div>
+                  <div class="profile-panel-role">{{ user_role_label }}</div>
+                </div>
+              </div>
+              <div class="profile-panel-email">{{ current_user.email if current_user else '' }}</div>
+            </div>
+            <a href="{{ url_for('configuracoes.meu_perfil') }}" class="profile-menu-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+              Meu perfil
+            </a>
+            <a href="{{ url_for('configuracoes.configuracoes') }}" class="profile-menu-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              Configurações
+            </a>
+            <div class="profile-menu-divider"></div>
+            <a href="{{ url_for('auth.logout') }}" class="profile-menu-item danger">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            {% if category == 'success' %}<path d="M20 6L9 17l-5-5"/>
+            {% elif category in ['error','danger'] %}<path d="M18 6L6 18M6 6l12 12"/>
+            {% else %}<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            {% endif %}
+          </svg>
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Page Content -->
+    <div class="page-body">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

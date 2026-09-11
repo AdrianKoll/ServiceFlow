@@ -1,0 +1,431 @@
+/* ══════════════════════════════════════════
+   DASHBOARD — Estilos exclusivos da home
+   Contém: grade principal do dashboard,
+   card de gráfico, lista de equipe e
+   barras de progresso dos membros.
+   KPI cards ficam em components.css pois
+   podem ser reutilizados em relatórios.
+   ══════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────
+   Greeting
+   ────────────────────────────────────────── */
+.dash-greeting {
+  margin-bottom: 20px;
+}
+.dash-greeting-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+.dash-greeting-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ──────────────────────────────────────────
+   KPI grid 4 colunas (override do auto-fill)
+   ────────────────────────────────────────── */
+.kpi-grid-4 {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+/* ──────────────────────────────────────────
+   Charts row: área + donut lado a lado
+   ────────────────────────────────────────── */
+.dash-charts-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ──────────────────────────────────────────
+   Donut legend
+   ────────────────────────────────────────── */
+.dash-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dash-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.dash-legend-item strong {
+  margin-left: auto;
+  color: var(--text);
+  font-weight: 600;
+}
+.dash-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ──────────────────────────────────────────
+   Bottom 3 stat cards
+   ────────────────────────────────────────── */
+.dash-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.dash-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+}
+.dash-stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dash-stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.dash-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+/* ──────────────────────────────────────────
+   Grade 2 colunas: tabela recente + coluna lateral
+   No mobile colapsa para 1 coluna (ver responsive.css)
+   ────────────────────────────────────────── */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ──────────────────────────────────────────
+   Lista de membros da equipe (widget lateral)
+   ────────────────────────────────────────── */
+.team-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.team-item:last-child {
+  border-bottom: none;
+}
+.team-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(110, 86, 207, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.team-info {
+  flex: 1;
+  min-width: 0;
+}
+.team-name {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.team-tasks {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ──────────────────────────────────────────
+   Barra de progresso por membro
+   ────────────────────────────────────────── */
+.progress-bar {
+  height: 4px;
+  background: var(--bg-hover);
+  border-radius: 2px;
+  margin-top: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* ──────────────────────────────────────────
+
+   Produto/analytics refinado
+
+   ────────────────────────────────────────── */
+.pro-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.quick-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.pro-kpi {
+  position: relative;
+  overflow: hidden;
+}
+.pro-kpi::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 90px;
+  height: 90px;
+  border-radius: 999px;
+  background: var(--primary-alpha);
+  opacity: 0.65;
+}
+.mini-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.mini-dot.success {
+  background: var(--success);
+}
+.mini-dot.info {
+  background: var(--info);
+}
+.mini-dot.primary {
+  background: var(--primary);
+}
+.mini-dot.danger {
+  background: var(--danger);
+}
+.risk-card {
+  border-color: rgba(248, 81, 73, 0.35);
+}
+.insight-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.insight-card {
+  min-height: 180px;
+}
+.health-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.health-score {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.health-ring {
+  --score: 0;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--primary) calc(var(--score) * 1%),
+    var(--bg-hover) 0
+  );
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.health-ring::before {
+  content: "";
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--bg-card);
+}
+.health-ring span {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  color: var(--text);
+}
+.health-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.health-sub,
+.text-muted-small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.health-list {
+  display: grid;
+  gap: 8px;
+}
+.health-list div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 10px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12.5px;
+}
+.activity-list {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.015);
+}
+.activity-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: white;
+  background: var(--primary);
+}
+.activity-icon.client {
+  background: var(--info);
+}
+.activity-icon.task {
+  background: var(--warning);
+}
+.activity-icon.finance {
+  background: var(--success);
+}
+.activity-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.activity-info strong {
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.activity-info span {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 18px !important;
+}
+.team-performance-list {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.team-score-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-hover);
+}
+.team-score-item strong {
+  font-size: 13px;
+}
+.performance-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 0.9fr;
+  gap: 16px;
+}
+.person-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.decision-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.decision-card {
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-hover);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.decision-card strong {
+  font-size: 13px;
+}
+.decision-card span {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+@media (max-width: 1024px) {
+  .insight-grid,
+  .performance-grid {
+    grid-template-columns: 1fr;
+  }
+  .decision-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .pro-hero {
+    flex-direction: column;
+  }
+  .quick-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .quick-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  .activity-item {
+    align-items: flex-start;
+  }
+  .activity-item .badge {
+    display: none;
+  }
+}
