@@ -219,9 +219,10 @@ def request_content_length(upload_stream) -> int | None:
     return length if isinstance(length, int) and length >= 0 else None
 
 
-def _delete_all(model) -> int:
-    count = model.query.count()
-    model.query.delete(synchronize_session=False)
+def _delete_all(model, tenant_id: int) -> int:
+    query = model.query.filter(model.tenant_id == tenant_id)
+    count = query.count()
+    query.delete(synchronize_session=False)
     return count
 
 
@@ -232,23 +233,46 @@ def reset_operational_data(current_user: User) -> dict:
 
     create_backup(kind=MANUAL_FOLDER_NAME, reason="antes_do_reset")
 
+    tenant_id = current_user.tenant_id
+    thread_ids = [
+        thread_id
+        for (thread_id,) in db.session.query(MessageThread.id).filter(
+            MessageThread.tenant_id == tenant_id
+        ).all()
+    ]
+    if thread_ids:
+        participant_count = ThreadParticipant.query.filter(
+            ThreadParticipant.thread_id.in_(thread_ids)
+        ).count()
+        message_count = Message.query.filter(
+            Message.thread_id.in_(thread_ids)
+        ).count()
+        ThreadParticipant.query.filter(ThreadParticipant.thread_id.in_(thread_ids)).delete(
+            synchronize_session=False
+        )
+        Message.query.filter(Message.thread_id.in_(thread_ids)).delete(
+            synchronize_session=False
+        )
+
     # Ordem respeita dependências de chave estrangeira.
     deleted = {
-        "notifications": _delete_all(Notification),
-        "messages": _delete_all(Message),
-        "thread_participants": _delete_all(ThreadParticipant),
-        "message_threads": _delete_all(MessageThread),
-        "events": _delete_all(Event),
-        "tasks": _delete_all(Task),
-        "transactions": _delete_all(Transaction),
-        "services": _delete_all(Service),
+        "notifications": _delete_all(Notification, tenant_id),
+        "messages": message_count if thread_ids else 0,
+        "thread_participants": participant_count if thread_ids else 0,
+        "message_threads": _delete_all(MessageThread, tenant_id),
+        "events": _delete_all(Event, tenant_id),
+        "tasks": _delete_all(Task, tenant_id),
+        "transactions": _delete_all(Transaction, tenant_id),
+        "services": _delete_all(Service, tenant_id),
     }
 
     # Remove clientes depois dos registros que dependem deles.
-    deleted["clients"] = _delete_all(Client)
+    deleted["clients"] = _delete_all(Client, tenant_id)
 
     # Preserva o usuário logado para não derrubar o acesso após o reset.
-    deleted["users_removed"] = User.query.filter(User.id != current_user.id).delete(synchronize_session=False)
+    deleted["users_removed"] = User.query.filter(
+        User.tenant_id == tenant_id, User.id != current_user.id
+    ).delete(synchronize_session=False)
     current_user.client_id = None
     current_user.status = "active"
 

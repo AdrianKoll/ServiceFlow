@@ -39,7 +39,6 @@ BLUEPRINT_MODULES = [
     "modules.assinatura.routes",
     "modules.configuracoes.routes",
     "modules.notifications.routes",
-    "modules.dev.routes",
 ]
 
 
@@ -79,15 +78,10 @@ def create_app() -> Flask:
     register_security_headers(app)
     register_blueprints(app)
 
-    # Bootstrap seguro para ambiente demonstrativo/SQLite.
-    # Mantém compatibilidade com hospedagens simples quando o banco ainda não foi migrado.
-    try:
+    # Desenvolvimento usa create_all para facilitar testes; produção usa Alembic.
+    if app.config.get("ENV") != "production":
         with app.app_context():
             db.create_all()
-    except Exception as exc:
-        if app.config.get("ENV") == "production":
-            raise
-        app.logger.warning("Bootstrap de banco ignorado em desenvolvimento: %s", exc)
 
     return app
 

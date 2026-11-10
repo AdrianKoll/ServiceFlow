@@ -6,16 +6,7 @@ Fallback: db.create_all() somente quando Alembic não estiver instalado no ambie
 from __future__ import annotations
 
 from pathlib import Path
-from werkzeug.security import generate_password_hash
-
-from models import db, User
-
-
-def _ensure_admin_password() -> None:
-    admin = User.query.filter_by(role='admin').first()
-    if admin and not admin.password_hash:
-        admin.password_hash = generate_password_hash('admin123')
-        db.session.commit()
+from models import db
 
 
 def run_migrations(app) -> None:
@@ -34,9 +25,8 @@ def run_migrations(app) -> None:
             alembic_cfg.set_main_option('script_location', str(base_dir / 'migrations'))
             alembic_cfg.set_main_option('sqlalchemy.url', app.config['SQLALCHEMY_DATABASE_URI'])
             command.upgrade(alembic_cfg, 'head')
-        except Exception as exc:
-            # Fallback intencional para SQLite/teste. Não interrompe o app por falha de ferramenta.
-            print(f'[ServiceFlow] Alembic indisponível/falhou; usando db.create_all() como fallback: {exc}')
+        except ImportError as exc:
+            if app.config.get('ENV') == 'production':
+                raise RuntimeError('Alembic é obrigatório em produção.') from exc
+            print(f'[ServiceFlow] Alembic indisponível; usando db.create_all() apenas em desenvolvimento: {exc}')
             db.create_all()
-
-        _ensure_admin_password()
