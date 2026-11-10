@@ -9,6 +9,7 @@ from models import db, User, Client, Service, Task, Event, Transaction, MessageT
 from core.auth import get_current_user, login_required, role_required, module_required, home_for_role
 from core.constants import EMPLOYEE_ROLES
 from services.plans import can_create_resource
+from core.tenant_policy import get_scoped_or_404, scoped_query
 
 bp = Blueprint('clientes', __name__)
 
@@ -18,7 +19,7 @@ bp = Blueprint('clientes', __name__)
 def clientes():
     status_f = request.args.get('status', '')
     search_f = request.args.get('search', '')
-    q = Client.query
+    q = scoped_query(Client)
     if status_f: q = q.filter_by(status=status_f)
     if search_f: q = q.filter(Client.name.ilike(f'%{search_f}%'))
     clients = q.order_by(Client.created_at.desc()).all()
@@ -54,7 +55,7 @@ def cliente_novo():
 @login_required
 @module_required('clientes')
 def cliente_editar(id):
-    c = Client.query.get_or_404(id)
+    c = get_scoped_or_404(Client, id)
     c.name    = request.form['name']
     c.email   = request.form.get('email') or None
     c.phone   = request.form.get('phone') or None
@@ -72,7 +73,7 @@ def cliente_editar(id):
 @login_required
 @role_required('admin', 'manager')
 def cliente_excluir(id):
-    c = Client.query.get_or_404(id)
+    c = get_scoped_or_404(Client, id)
     db.session.delete(c)
     db.session.commit()
     flash('Cliente excluído.', 'info')

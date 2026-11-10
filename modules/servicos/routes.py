@@ -10,6 +10,7 @@ from core.auth import get_current_user, login_required, role_required, module_re
 from core.constants import EMPLOYEE_ROLES
 from services.plans import can_create_resource
 from core.form_utils import FormError, text, optional_int, optional_decimal, optional_datetime
+from core.tenant_policy import get_scoped_or_404, scoped_query
 
 bp = Blueprint('servicos', __name__)
 
@@ -17,17 +18,20 @@ bp = Blueprint('servicos', __name__)
 @login_required
 @module_required('servicos')
 def servicos():
+    current_user = get_current_user()
     status_f = request.args.get('status', '')
     search_f = request.args.get('search', '')
     q = db.session.query(Service, Client.name.label('client_name'), User.name.label('resp_name'))\
         .outerjoin(Client, Service.client_id == Client.id)\
-        .outerjoin(User, Service.responsible_id == User.id)
+        .outerjoin(User, Service.responsible_id == User.id)\
+        .filter(Service.tenant_id == current_user.tenant_id)
     if status_f: q = q.filter(Service.status == status_f)
     if search_f: q = q.filter(Service.title.ilike(f'%{search_f}%'))
     services = q.order_by(Service.created_at.desc()).all()
-    clients  = Client.query.order_by(Client.name).all()
+    clients  = scoped_query(Client).order_by(Client.name).all()
     users    = User.query.filter(User.status == 'active',
-                                 User.role.in_(EMPLOYEE_ROLES)).order_by(User.name).all()
+                                 User.role.in_(EMPLOYEE_ROLES),
+                                 User.tenant_id == current_user.tenant_id).order_by(User.name).all()
     return render_template('servicos.html', services=services, clients=clients,
         users=users, status_f=status_f, search_f=search_f)
 
@@ -35,21 +39,28 @@ def servicos():
 @login_required
 @module_required('servicos')
 def servico_novo():
+    current_user = get_current_user()
     ok, message = can_create_resource(get_current_user(), 'services')
     if not ok:
         flash(message, 'warning')
         return redirect(url_for('assinatura.assinatura', blocked='services'))
     try:
+        client_id = optional_int(request.form, 'client_id')
+        responsible_id = optional_int(request.form, 'responsible_id')
+        if client_id:
+            get_scoped_or_404(Client, client_id)
+        if responsible_id:
+            get_scoped_or_404(User, responsible_id)
         s = Service(
             title=text(request.form, 'title', required=True),
             description=text(request.form, 'description'),
             status=request.form.get('status', 'pending'),
             priority=request.form.get('priority', 'medium'),
-            client_id=optional_int(request.form, 'client_id'),
-            responsible_id=optional_int(request.form, 'responsible_id'),
+            client_id=client_id,
+            responsible_id=responsible_id,
             value=optional_decimal(request.form, 'value'),
             due_date=optional_datetime(request.form, 'due_date', '%Y-%m-%d'),
-            tenant_id=get_current_user().tenant_id,
+            tenant_id=current_user.tenant_id,
         )
         db.session.add(s)
         db.session.commit()
@@ -63,14 +74,20 @@ def servico_novo():
 @login_required
 @module_required('servicos')
 def servico_editar(id):
-    s = Service.query.get_or_404(id)
+    s = get_scoped_or_404(Service, id)
     try:
+        client_id = optional_int(request.form, 'client_id')
+        responsible_id = optional_int(request.form, 'responsible_id')
+        if client_id:
+            get_scoped_or_404(Client, client_id)
+        if responsible_id:
+            get_scoped_or_404(User, responsible_id)
         s.title          = text(request.form, 'title', required=True)
         s.description    = text(request.form, 'description')
         s.status         = request.form.get('status', 'pending')
         s.priority       = request.form.get('priority', 'medium')
-        s.client_id      = optional_int(request.form, 'client_id')
-        s.responsible_id = optional_int(request.form, 'responsible_id')
+        s.client_id      = client_id
+        s.responsible_id = responsible_id
         s.value          = optional_decimal(request.form, 'value')
         s.due_date       = optional_datetime(request.form, 'due_date', '%Y-%m-%d')
         s.updated_at     = datetime.utcnow()
@@ -85,7 +102,7 @@ def servico_editar(id):
 @login_required
 @role_required('admin', 'manager')
 def servico_excluir(id):
-    s = Service.query.get_or_404(id)
+    s = get_scoped_or_404(Service, id)
     db.session.delete(s)
     db.session.commit()
     flash('Serviço excluído.', 'info')
