@@ -1,0 +1,2 @@
+# Arquivos Jinja não devem ser contabilizados como HTML pelo GitHub Linguist.
+templates/** linguist-detectable=false
