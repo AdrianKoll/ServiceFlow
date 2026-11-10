@@ -2,18 +2,22 @@
 
 O ServiceFlow é uma aplicação web de gestão de serviços desenvolvida em Flask. O sistema centraliza clientes, serviços, tarefas, agenda, financeiro, mensagens, relatórios e configurações em uma interface responsiva.
 
+> **Estado do projeto:** protótipo/portfólio em evolução. A aplicação tem boas proteções de base, mas não deve receber dados reais de múltiplos clientes antes da conclusão do isolamento por tenant descrito na seção de segurança.
+
 ## Funcionalidades
 
 - Dashboard com indicadores operacionais;
 - cadastro e acompanhamento de clientes e serviços;
 - tarefas, responsáveis, prazos e agenda;
 - controle financeiro de entradas e saídas;
-- mensagens e notificações internas;
-- relatórios de desempenho;
+- mensagens internas restritas a participantes da equipe;
+- relatórios de desempenho e exportação CSV;
 - autenticação, perfis e permissões por função;
 - configurações de perfil e aparência;
-- backup, restauração e reset operacional com acesso administrativo;
-- suporte a SQLite para desenvolvimento e PostgreSQL para produção.
+- backup, restauração e reset operacional para SQLite;
+- suporte a SQLite para desenvolvimento e PostgreSQL para produção, com limitações de backup documentadas abaixo.
+
+As integrações exibidas na tela de configurações são um catálogo demonstrativo. Alternar uma integração grava apenas o estado na sessão; não há conexão real com WhatsApp, Google Calendar, Stripe/Pagar.me, Slack ou Zapier.
 
 ## Stack
 
@@ -25,26 +29,28 @@ O ServiceFlow é uma aplicação web de gestão de serviços desenvolvida em Fla
 - SQLite para desenvolvimento local
 - PostgreSQL recomendado para produção
 - Gunicorn para execução em produção
+- Flask-Limiter para limitação de tentativas
 
 ## Estrutura do projeto
 
 ```text
 ServiceFlow/
-├── app.py                    # Fábrica e bootstrap da aplicação
+├── app.py                    # Fábrica, bootstrap e registro dos blueprints
 ├── core/                     # Configuração, autenticação e recursos transversais
 ├── models/                   # Entidades SQLAlchemy
 ├── modules/                  # Blueprints separados por domínio
 ├── services/                 # Regras reutilizáveis e serviços auxiliares
 ├── migrations/               # Migrações Alembic
 ├── templates/                # Templates Jinja2
-├── static/                   # CSS, JavaScript e imagens
+├── static/                   # CSS, JavaScript e uploads de perfil
 ├── tests/                    # Testes automatizados
+├── scripts/check_http.py     # Verificação HTTP pública/autenticada
 ├── .env.example              # Modelo público de configuração
 ├── requirements.txt          # Dependências de produção
 └── .github/workflows/ci.yml  # Pipeline de testes
 ```
 
-A aplicação usa uma divisão por responsabilidade: `app.py` registra extensões e blueprints; `core/` concentra configurações e segurança; `modules/` organiza rotas por domínio; `services/` mantém regras reutilizáveis; e `models/` representa os dados persistidos.
+A aplicação usa uma divisão por responsabilidade: `app.py` registra extensões e blueprints; `core/` concentra configuração, autenticação e segurança; `modules/` organiza rotas por domínio; `services/` mantém regras reutilizáveis; e `models/` representa os dados persistidos.
 
 ## Instalação local
 
@@ -70,7 +76,7 @@ python -m pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Para desenvolvimento local, o projeto usa SQLite quando `DATABASE_URL` não é definida. A chave `SESSION_SECRET` deve ser trocada por um valor aleatório exclusivo:
+Para desenvolvimento local, use SQLite e uma chave de sessão exclusiva:
 
 ```env
 SERVICEFLOW_ENV=development
@@ -89,23 +95,54 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 O arquivo `.env` é ignorado pelo Git e nunca deve ser enviado ao repositório.
 
+O `.env.example` contém uma URL PostgreSQL como referência de produção. Para desenvolvimento SQLite, substitua `DATABASE_URL` conforme o exemplo acima.
+
+## Banco de dados e migrações
+
+O fluxo oficial de evolução do schema é Alembic. Antes de iniciar a aplicação em um ambiente novo ou após atualizar o código, execute:
+
+```bash
+alembic upgrade head
+```
+
+O bloco `if __name__ == "__main__"` de `app.py` também chama `run_migrations(app)` quando a aplicação é iniciada com `python app.py`. O comando `gunicorn app:app` importa a aplicação e não executa esse bloco; em produção, a migração deve ser uma etapa explícita do deploy.
+
+`db.create_all()` permanece apenas como compatibilidade para demonstrações e testes. Ele não substitui migrações, não altera tabelas existentes e não deve ser usado como estratégia de deploy.
+
 ## Executar
 
 ```bash
 python app.py
 ```
 
-Acesse <http://127.0.0.1:5000>. O servidor inicia com debug desativado. Para produção, use Gunicorn:
+Acesse <http://127.0.0.1:5000>. O servidor inicia com debug desativado. Para produção, execute as migrações e use Gunicorn:
 
 ```bash
+alembic upgrade head
 gunicorn app:app
 ```
 
-Em produção, defina `SERVICEFLOW_ENV=production`, `SESSION_SECRET`, `DATABASE_URL` apontando para PostgreSQL e `SESSION_COOKIE_SECURE=true` quando a aplicação estiver atrás de HTTPS. O sistema recusa iniciar em produção sem uma chave de sessão configurada.
+Em produção, defina `SERVICEFLOW_ENV=production`, `SESSION_SECRET`, `DATABASE_URL` apontando para PostgreSQL, `SESSION_COOKIE_SECURE=true` atrás de HTTPS e um `RATELIMIT_STORAGE_URI` compartilhado, como Redis. A aplicação recusa iniciar em produção sem `SESSION_SECRET` ou sem cookie seguro.
+
+## Verificação HTTP
+
+Com a aplicação em execução, verifique as páginas públicas:
+
+```bash
+python scripts/check_http.py
+```
+
+Para testar páginas autenticadas, não existem credenciais fixas no repositório. Informe credenciais de uma conta de teste por variáveis de ambiente:
+
+```bash
+SERVICEFLOW_CHECK_EMAIL=admin@example.com \
+SERVICEFLOW_CHECK_PASSWORD='senha-de-teste-com-12-caracteres' \
+python scripts/check_http.py
+```
+
+O script obtém o token CSRF da página de login antes de enviar as credenciais.
 
 ## Testes e qualidade
-
-Instale o executor de testes e execute:
 
 ```bash
 python -m pip install pytest
@@ -113,18 +150,45 @@ pytest -q
 python -m compileall -q app.py core models modules services tests
 ```
 
-O workflow em `.github/workflows/ci.yml` executa esses checks em pushes e pull requests direcionados à branch `main`. O pipeline possui somente permissão de leitura do conteúdo do repositório.
+O workflow em `.github/workflows/ci.yml` executa esses checks em pushes e pull requests direcionados à branch `main`, com permissão somente de leitura do conteúdo do repositório.
 
-## Segurança operacional
+## Segurança implementada
 
-As rotas administrativas de backup, restauração e reset exigem autenticação e perfil `admin`. Backups de restauração aceitam somente arquivos ZIP, limitam o tamanho do upload e validam a assinatura do banco SQLite extraído. O reset cria uma cópia preventiva antes de remover dados operacionais.
+- Senhas são armazenadas com hash via Werkzeug e o cadastro exige pelo menos 12 caracteres;
+- métodos mutáveis exigem token CSRF, inclusive formulários públicos, uploads, restauração, reset e logout;
+- TRACE é rejeitado e redirects baseados em `next`/`Referer` aceitam somente caminhos locais;
+- o login aceita no máximo 5 tentativas por combinação de IP e e-mail a cada 15 minutos e responde com `429` ao atingir o limite;
+- em produção, `SESSION_COOKIE_SECURE=true` é obrigatório; o cookie também é `HttpOnly` e `SameSite=Lax`;
+- notificações só podem ser marcadas como lidas pelo usuário dono;
+- mensagens são restritas ao tenant, aos participantes da conversa e, para edição/exclusão, ao autor da mensagem;
+- criação/edição de membros valida cargo, status e senha mínima;
+- uploads de restauração têm limite de tamanho, são validados como SQLite e o arquivo recebido é removido após o processamento;
+- headers básicos incluem `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` e `Permissions-Policy`;
+- o CI mantém `contents: read` e não contém credenciais de teste fixas.
 
-Senhas devem ter pelo menos 12 caracteres e são armazenadas com hash. Segredos, arquivos `.env`, bancos locais, uploads e backups são excluídos pelo `.gitignore`.
+## Limitações e pendências de segurança
 
-Todos os métodos mutáveis exigem token CSRF, inclusive os formulários públicos e o logout. O login aceita no máximo 5 tentativas por combinação de IP e e-mail a cada 15 minutos e responde com `429` quando o limite é atingido. Em produção com múltiplos processos/instâncias, configure `RATELIMIT_STORAGE_URI` para um backend compartilhado, como Redis, em vez do padrão `memory://`.
+A revisão de segurança encontrou uma pendência crítica antes de uso como SaaS multi-tenant: várias telas de clientes, serviços, tarefas, agenda, financeiro e analytics ainda fazem consultas por ID ou listagens sem uma política centralizada de `tenant_id`. Um usuário autenticado que conheça um ID pode, dependendo do módulo, visualizar, editar ou excluir dados de outra empresa. A correção definitiva exige uma camada de autorização por objeto/tenant, validação de todos os IDs relacionados e testes negativos com pelo menos dois tenants.
 
-Antes de disponibilizar o sistema publicamente, ainda é necessária uma revisão específica da infraestrutura, habilitação de HTTPS, revisão de autorização por recurso e adoção de migrações versionadas em vez de depender apenas de `db.create_all()`.
+Outras pendências para produção são:
+
+1. usar Redis ou outro backend compartilhado no rate limiting;
+2. exigir reautenticação para restauração, reset, download de backup e troca de senha, além de invalidar sessões antigas após troca de senha;
+3. criptografar backups em repouso, aplicar retenção e auditoria; os backups atuais são cópias integrais SQLite sem criptografia;
+4. validar uploads de avatar por conteúdo/magic bytes, dimensões e re-encode, não apenas pela extensão;
+5. adicionar CSP com nonce/hash, HSTS somente quando HTTPS estiver garantido e revisar scripts/CDNs externos;
+6. adicionar SAST, auditoria de dependências, secret scanning e testes de autorização cross-tenant ao CI.
+
+### Escopo de backup
+
+O backup atual é **SQLite-only**. Os arquivos ficam em `instance/backups/{automaticos,manuais,restauracoes}` e o limite de upload é 10 MiB. O backup automático é criado sob demanda quando `/configuracoes` é acessado; não há scheduler configurado. Portanto, esse mecanismo não é um backup de produção PostgreSQL nem uma política de disaster recovery.
+
+## Comentários e documentação de código
+
+Os comentários e docstrings que explicam arquitetura, fluxo de migração, segurança, backup, dependências de foreign key e decisões de compatibilidade foram preservados. Comentários puramente decorativos ou ambíguos foram simplificados para descrever diretamente o comportamento da aplicação.
+
+Não foram encontradas integrações ou comentários sobre modelos generativos. Os termos “automático” e “automatizado” existentes referem-se a tarefas determinísticas, como backup sob demanda, CI e comportamento da interface.
 
 ## Status
 
-Projeto de portfólio em evolução. A base atual prioriza organização modular, configuração segura, documentação reproduzível, testes de fumaça e integração contínua.
+Projeto de portfólio em evolução. As proteções de base estão implementadas e testadas, mas o isolamento completo por tenant continua sendo requisito obrigatório antes de disponibilizar o sistema publicamente ou armazenar dados reais.
