@@ -23,7 +23,7 @@ class TenantMixin:
 
     @declared_attr
     def tenant_id(cls):
-        return db.Column(db.Integer, db.ForeignKey('tenants.id'), nullable=True, index=True)
+        return db.Column(db.Integer, db.ForeignKey('tenants.id'), nullable=False, index=True)
 
     @declared_attr
     def tenant(cls):

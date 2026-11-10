@@ -4,6 +4,7 @@ from sqlalchemy import func
 from services.analytics import core_kpis, status_distribution, finance_chart, report_rankings, employee_performance
 from core.auth import login_required, module_required
 from models import Service, Client, Transaction, db
+from core.tenant_policy import scoped_query
 
 bp = Blueprint('relatorios', __name__)
 
@@ -32,13 +33,15 @@ def relatorios():
 @module_required('relatorios')
 def relatorios_exportar_csv():
     rows = ['tipo,total']
-    rows.append(f"servicos,{Service.query.count()}")
-    rows.append(f"servicos_concluidos,{Service.query.filter_by(status='completed').count()}")
-    rows.append(f"servicos_em_andamento,{Service.query.filter_by(status='in_progress').count()}")
-    rows.append(f"servicos_pendentes,{Service.query.filter_by(status='pending').count()}")
-    rows.append(f"clientes,{Client.query.count()}")
-    income = db.session.query(func.sum(Transaction.amount)).filter_by(type='income').scalar() or 0
-    expense = db.session.query(func.sum(Transaction.amount)).filter_by(type='expense').scalar() or 0
+    services = scoped_query(Service)
+    transactions = scoped_query(Transaction)
+    rows.append(f"servicos,{services.count()}")
+    rows.append(f"servicos_concluidos,{services.filter_by(status='completed').count()}")
+    rows.append(f"servicos_em_andamento,{services.filter_by(status='in_progress').count()}")
+    rows.append(f"servicos_pendentes,{services.filter_by(status='pending').count()}")
+    rows.append(f"clientes,{scoped_query(Client).count()}")
+    income = transactions.filter_by(type='income').with_entities(func.sum(Transaction.amount)).scalar() or 0
+    expense = transactions.filter_by(type='expense').with_entities(func.sum(Transaction.amount)).scalar() or 0
     rows.append(f"receita,{float(income):.2f}")
     rows.append(f"despesas,{float(expense):.2f}")
     csv = '\n'.join(rows) + '\n'

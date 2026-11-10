@@ -16,13 +16,17 @@ def get_notifications():
     user = get_current_user()
     if not user:
         return []
-    return Notification.query.filter_by(user_id=user.id).order_by(Notification.created_at.desc()).limit(10).all()
+    return Notification.query.filter_by(
+        user_id=user.id, tenant_id=user.tenant_id
+    ).order_by(Notification.created_at.desc()).limit(10).all()
 
 def get_unread_count():
     user = get_current_user()
     if not user:
         return 0
-    return Notification.query.filter_by(user_id=user.id, read=False).count()
+    return Notification.query.filter_by(
+        user_id=user.id, tenant_id=user.tenant_id, read=False
+    ).count()
 
 def can_access(module: str) -> bool:
     user = get_current_user()

@@ -29,6 +29,7 @@ def dashboard():
         Service, Client.name.label('client_name'), User.name.label('resp_name')
     ).outerjoin(Client, Service.client_id == Client.id)\
      .outerjoin(User, Service.responsible_id == User.id)\
+     .filter(Service.tenant_id == current_user.tenant_id)\
      .order_by(Service.created_at.desc()).limit(5).all()
 
     return render_template(
