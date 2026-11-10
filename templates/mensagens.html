@@ -74,6 +74,7 @@
         </div>
         <form action="{{ url_for('mensagens.thread_excluir', thread_id=active_thread.id) }}" method="post"
               onsubmit="return confirm('Excluir esta conversa e todas as mensagens?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <button type="submit" class="btn btn-ghost btn-icon" title="Excluir conversa"
                   style="color:var(--danger)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -116,6 +117,7 @@
                 <form action="{{ url_for('mensagens.mensagem_excluir', thread_id=active_thread.id, msg_id=msg.id) }}"
                       method="post" style="display:inline"
                       onsubmit="return confirm('Excluir esta mensagem?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                   <button type="submit" class="msg-action-btn msg-action-danger" title="Excluir">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
                   </button>
@@ -139,6 +141,7 @@
             {% if is_mine %}
             <div id="edit-{{ msg.id }}" class="msg-edit-form" style="display:none">
               <form action="{{ url_for('mensagens.mensagem_editar', thread_id=active_thread.id, msg_id=msg.id) }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <textarea name="content" class="msg-edit-input" rows="2">{{ msg.content }}</textarea>
                 <div class="msg-edit-actions">
                   <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
@@ -167,6 +170,7 @@
       <!-- Barra de envio -->
       <form class="chat-input-bar"
             action="{{ url_for('mensagens.mensagem_enviar', thread_id=active_thread.id) }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <input type="text" name="content" id="msgInput"
                placeholder="Digite uma mensagem e pressione Enter ou clique em enviar…"
                required autocomplete="off"/>
@@ -212,6 +216,7 @@
     </div>
 
     <form action="{{ url_for('mensagens.mensagem_novo_thread') }}" method="post" id="formNovoThread">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
       <!-- Nome do grupo -->
       <div class="form-group">

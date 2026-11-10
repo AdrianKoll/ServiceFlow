@@ -6,6 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Client, Tenant
 from core.auth import get_current_user, home_for_role
 from services.plans import PLAN_CATALOG, apply_plan
+from core.extensions import limiter
+from core.security import login_rate_limit_key
 
 bp = Blueprint('auth', __name__)
 
@@ -21,6 +23,7 @@ def _slugify_company(name: str) -> str:
 
 
 @bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit('5 per 15 minutes', methods=['POST'], key_func=login_rate_limit_key)
 def login():
     if session.get('user_id'):
         user = get_current_user()
@@ -58,7 +61,7 @@ def login():
     return render_template('login.html', email='')
 
 
-@bp.route('/logout')
+@bp.route('/logout', methods=['POST'])
 def logout():
     session.clear()
     flash('Sessão encerrada. Até logo!', 'info')

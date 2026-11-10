@@ -59,6 +59,7 @@
           </div>
         </div>
         <form id="del-evt-{{ event.id }}" action="{{ url_for('agenda.evento_excluir', id=event.id) }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <button type="button" class="btn btn-ghost btn-icon" style="color:var(--danger)" data-delete-form="del-evt-{{ event.id }}" title="Excluir">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
           </button>
@@ -103,6 +104,7 @@
       <button class="modal-close" data-modal-close="modalNovoEvento">✕</button>
     </div>
     <form action="{{ url_for('agenda.evento_novo') }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <div class="form-group">
         <label class="form-label">Título *</label>
         <input type="text" name="title" class="form-control" required placeholder="Título do evento"/>

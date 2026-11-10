@@ -101,6 +101,7 @@
     <div class="auth-sub">Acesse o painel de gestão de serviços</div>
 
     <form method="post" action="{{ url_for('auth.login') }}{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <div class="form-group">
         <label class="form-label" for="email">E-mail</label>
         <input type="email" id="email" name="email" class="form-control"

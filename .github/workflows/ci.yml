@@ -16,6 +16,7 @@ jobs:
       SERVICEFLOW_ENV: development
       SESSION_SECRET: ci-only-secret
       DATABASE_URL: sqlite:///:memory:
+      RATELIMIT_STORAGE_URI: memory://
 
     steps:
       - name: Baixar código

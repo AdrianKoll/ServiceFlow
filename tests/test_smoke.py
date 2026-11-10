@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -31,9 +32,12 @@ def test_login_page_and_security_headers(client):
 
 
 def test_registration_rejects_short_password(client):
+    page = client.get("/cadastro")
+    csrf_token = re.search(r'name="csrf_token" value="([^"]+)"', page.get_data(as_text=True)).group(1)
     response = client.post(
         "/cadastro",
         data={
+            "csrf_token": csrf_token,
             "company_name": "Empresa de Teste",
             "name": "Pessoa de Teste",
             "email": "teste@example.com",
@@ -45,3 +49,24 @@ def test_registration_rejects_short_password(client):
 
     assert response.status_code == 200
     assert "12 caracteres" in response.get_data(as_text=True)
+
+
+def test_mutating_request_without_csrf_is_rejected(client):
+    response = client.post(
+        "/cadastro",
+        data={"company_name": "Empresa", "name": "Pessoa", "email": "pessoa@example.com"},
+    )
+
+    assert response.status_code == 400
+    assert "CSRF" in response.get_data(as_text=True)
+
+
+def test_login_is_rate_limited(client):
+    page = client.get("/login")
+    csrf_token = re.search(r'name="csrf_token" value="([^"]+)"', page.get_data(as_text=True)).group(1)
+    data = {"csrf_token": csrf_token, "email": "brute@example.com", "password": "senha-incorreta"}
+
+    responses = [client.post("/login", data=data) for _ in range(6)]
+
+    assert all(response.status_code == 200 for response in responses[:5])
+    assert responses[-1].status_code == 429

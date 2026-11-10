@@ -37,6 +37,7 @@
     <div class="auth-sub">Esta conta será a dona do ambiente da empresa. Depois, dentro do painel, o administrador cria técnicos, gerentes e atendentes.</div>
     <div class="plan-pill"><span>Plano selecionado</span><strong>{{ selected_plan['name'] }} · {{ selected_plan['price_label'] }}</strong></div>
     <form method="post" action="{{ url_for('auth.cadastro', plano=plan) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <input type="hidden" name="plan" value="{{ plan }}"/>
       <div class="form-group"><label class="form-label" for="company_name">Empresa / Negócio</label><input type="text" id="company_name" name="company_name" class="form-control" placeholder="Nome da sua empresa" value="{{ company_name }}" required autofocus/></div>
       <div class="form-group"><label class="form-label" for="name">Nome do administrador</label><input type="text" id="name" name="name" class="form-control" placeholder="Seu nome completo" value="{{ name }}" required/></div>

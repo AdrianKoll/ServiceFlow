@@ -91,6 +91,7 @@
       </ul>
       {% if current_user.role == 'admin' %}
       <form action="{{ url_for('assinatura.alterar_plano') }}" method="post" class="upgrade-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <input type="hidden" name="plan" value="{{ slug }}">
         <div class="form-row">
           <div class="form-group"><label>Pagamento demo</label><select name="payment_method" class="form-control">{% for method in payment_methods %}<option value="{{ method['slug'] }}">{{ method['icon'] }} {{ method['name'] }}</option>{% endfor %}</select></div>

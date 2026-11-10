@@ -52,17 +52,20 @@
         <div class="kanban-move-btns">
           {% if prev_status %}
           <form action="{{ url_for('tarefas.tarefa_mover', id=task.id) }}" method="post" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="status" value="{{ prev_status }}"/>
             <button type="submit" class="btn btn-ghost btn-sm" title="Voltar">◀</button>
           </form>
           {% endif %}
           {% if next_status %}
           <form action="{{ url_for('tarefas.tarefa_mover', id=task.id) }}" method="post" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="status" value="{{ next_status }}"/>
             <button type="submit" class="btn btn-ghost btn-sm" title="Avançar">▶</button>
           </form>
           {% endif %}
           <form id="del-task-{{ task.id }}" action="{{ url_for('tarefas.tarefa_excluir', id=task.id) }}" method="post" style="display:inline;margin-left:auto">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <button type="button" class="btn btn-ghost btn-sm" style="color:var(--danger)" data-delete-form="del-task-{{ task.id }}">✕</button>
           </form>
         </div>
@@ -85,6 +88,7 @@
       <button class="modal-close" data-modal-close="modalNovaTarefa">✕</button>
     </div>
     <form action="{{ url_for('tarefas.tarefa_nova') }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <div class="form-group">
         <label class="form-label">Título *</label>
         <input type="text" name="title" class="form-control" required placeholder="Título da tarefa"/>

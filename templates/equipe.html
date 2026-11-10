@@ -66,6 +66,7 @@
         Editar
       </button>
       <form id="del-usr-{{ u.id }}" action="{{ url_for('equipe.equipe_excluir', id=u.id) }}" method="post" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <button type="button" class="btn btn-danger btn-sm" data-delete-form="del-usr-{{ u.id }}">Remover</button>
       </form>
     </div>
@@ -83,6 +84,7 @@
       <button class="modal-close" data-modal-close="modalNovoUsuario">✕</button>
     </div>
     <form action="{{ url_for('equipe.equipe_novo') }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Nome *</label>
@@ -142,6 +144,7 @@
       <button class="modal-close" data-modal-close="modalEditUsuario">✕</button>
     </div>
     <form action="" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Nome *</label>

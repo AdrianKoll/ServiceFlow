@@ -30,6 +30,7 @@
       </ul>
     </div>
     <form method="post" class="demo-payment-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <h2>Dados de pagamento</h2>
       <p class="checkout-muted">Escolha uma forma demonstrativa. Em produção, aqui entraria Stripe, Mercado Pago, Asaas, Pagar.me ou outro gateway.</p>
       <div class="payment-tabs">

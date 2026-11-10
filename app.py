@@ -16,6 +16,7 @@ from core.formatters import fmt_brl, fmt_date, fmt_datetime
 from core.migrations import run_migrations
 from core.security import register_security_headers
 from models import db
+from core.extensions import limiter
 
 
 # Blueprints registrados em ordem previsível.
@@ -70,6 +71,7 @@ def create_app() -> Flask:
 
     # Extensões
     db.init_app(app)
+    limiter.init_app(app)
 
     # Camadas transversais
     register_template_helpers(app)

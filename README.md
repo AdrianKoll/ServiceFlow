@@ -77,6 +77,7 @@ SERVICEFLOW_ENV=development
 SESSION_SECRET=gere-uma-chave-aleatoria-e-exclusiva
 DATABASE_URL=sqlite:///serviceflow_dev.sqlite3
 SESSION_COOKIE_SECURE=false
+RATELIMIT_STORAGE_URI=memory://
 PORT=5000
 ```
 
@@ -120,7 +121,9 @@ As rotas administrativas de backup, restauração e reset exigem autenticação 
 
 Senhas devem ter pelo menos 12 caracteres e são armazenadas com hash. Segredos, arquivos `.env`, bancos locais, uploads e backups são excluídos pelo `.gitignore`.
 
-Antes de disponibilizar o sistema publicamente, recomenda-se executar uma revisão de segurança específica da infraestrutura, habilitar HTTPS, configurar proteção CSRF para todos os formulários mutáveis, revisar autorização por recurso, adicionar rate limiting ao login e usar migrações versionadas em vez de depender apenas de `db.create_all()`.
+Todos os métodos mutáveis exigem token CSRF, inclusive os formulários públicos e o logout. O login aceita no máximo 5 tentativas por combinação de IP e e-mail a cada 15 minutos e responde com `429` quando o limite é atingido. Em produção com múltiplos processos/instâncias, configure `RATELIMIT_STORAGE_URI` para um backend compartilhado, como Redis, em vez do padrão `memory://`.
+
+Antes de disponibilizar o sistema publicamente, ainda é necessária uma revisão específica da infraestrutura, habilitação de HTTPS, revisão de autorização por recurso e adoção de migrações versionadas em vez de depender apenas de `db.create_all()`.
 
 ## Status
 

@@ -17,6 +17,8 @@ class Config:
     SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'false').lower() == 'true'
     SESSION_COOKIE_NAME = 'serviceflow_session'
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024
+    RATELIMIT_STORAGE_URI = os.environ.get('RATELIMIT_STORAGE_URI', 'memory://')
+    RATELIMIT_HEADERS_ENABLED = True
 
     JSON_SORT_KEYS = False
 
