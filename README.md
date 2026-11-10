@@ -161,6 +161,10 @@ O workflow em `.github/workflows/ci.yml` executa esses checks em pushes e pull r
 - em produção, `SESSION_COOKIE_SECURE=true` é obrigatório; o cookie também é `HttpOnly` e `SameSite=Lax`;
 - notificações só podem ser marcadas como lidas pelo usuário dono;
 - mensagens são restritas ao tenant, aos participantes da conversa e, para edição/exclusão, ao autor da mensagem;
+- consultas operacionais usam `core.tenant_policy`, com escopo por tenant em clientes, serviços, tarefas, agenda, financeiro, portal, dashboard, relatórios e analytics;
+- IDs relacionados, como `client_id`, `service_id`, `responsible_id`, `assignee_id` e `user_id`, são validados dentro do tenant atual antes de criar ou atualizar registros;
+- edições, exclusões, reset operacional e exportações são limitados ao tenant atual;
+- testes negativos cobrem dois tenants, listagem cross-tenant, edição cross-tenant e associação de serviço a cliente de outra empresa;
 - criação/edição de membros valida cargo, status e senha mínima;
 - uploads de restauração têm limite de tamanho, são validados como SQLite e o arquivo recebido é removido após o processamento;
 - headers básicos incluem `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` e `Permissions-Policy`;
@@ -168,7 +172,7 @@ O workflow em `.github/workflows/ci.yml` executa esses checks em pushes e pull r
 
 ## Limitações e pendências de segurança
 
-A revisão de segurança encontrou uma pendência crítica antes de uso como SaaS multi-tenant: várias telas de clientes, serviços, tarefas, agenda, financeiro e analytics ainda fazem consultas por ID ou listagens sem uma política centralizada de `tenant_id`. Um usuário autenticado que conheça um ID pode, dependendo do módulo, visualizar, editar ou excluir dados de outra empresa. A correção definitiva exige uma camada de autorização por objeto/tenant, validação de todos os IDs relacionados e testes negativos com pelo menos dois tenants.
+A política de autorização por tenant foi implementada nos módulos operacionais e validada com testes negativos usando dois tenants. A migração `20261110_0004_tenant_not_null` torna `tenant_id` obrigatório e falha de propósito se encontrar registros órfãos. Antes do deploy, execute `alembic upgrade head` em uma cópia do banco e associe manualmente qualquer registro antigo sem tenant ao tenant correto.
 
 Outras pendências para produção são:
 
@@ -177,7 +181,7 @@ Outras pendências para produção são:
 3. criptografar backups em repouso, aplicar retenção e auditoria; os backups atuais são cópias integrais SQLite sem criptografia;
 4. validar uploads de avatar por conteúdo/magic bytes, dimensões e re-encode, não apenas pela extensão;
 5. adicionar CSP com nonce/hash, HSTS somente quando HTTPS estiver garantido e revisar scripts/CDNs externos;
-6. adicionar SAST, auditoria de dependências, secret scanning e testes de autorização cross-tenant ao CI.
+6. adicionar SAST, auditoria de dependências e secret scanning ao CI; os testes básicos de autorização cross-tenant já estão no projeto.
 
 ### Escopo de backup
 
@@ -191,4 +195,4 @@ Não foram encontradas integrações ou comentários sobre modelos generativos. 
 
 ## Status
 
-Projeto de portfólio em evolução. As proteções de base estão implementadas e testadas, mas o isolamento completo por tenant continua sendo requisito obrigatório antes de disponibilizar o sistema publicamente ou armazenar dados reais.
+Projeto de portfólio em evolução. O isolamento por tenant está implementado na camada de aplicação e coberto por testes. O uso público ainda exige migração controlada do banco, rate limiting compartilhado, backups criptografados, reautenticação para operações destrutivas e hardening do ambiente HTTP.
