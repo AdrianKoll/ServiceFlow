@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import db, User
 from core.auth import get_current_user, login_required, role_required
+from core.security import local_redirect
 from services.backup_manager import create_backup, ensure_daily_backup, list_backups, reset_operational_data, restore_backup
 
 bp = Blueprint('configuracoes', __name__)
@@ -52,7 +53,7 @@ def _settings_redirect(tab: str):
 def toggle_theme():
     current = session.get('theme', 'dark')
     session['theme'] = 'light' if current == 'dark' else 'dark'
-    return redirect(request.referrer or url_for('main.dashboard'))
+    return redirect(local_redirect(request.referrer, url_for('main.dashboard')))
 
 
 @bp.route('/meu-perfil')

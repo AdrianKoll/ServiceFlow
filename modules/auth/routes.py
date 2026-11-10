@@ -7,7 +7,7 @@ from models import db, User, Client, Tenant
 from core.auth import get_current_user, home_for_role
 from services.plans import PLAN_CATALOG, apply_plan
 from core.extensions import limiter
-from core.security import login_rate_limit_key
+from core.security import is_safe_local_url, login_rate_limit_key
 
 bp = Blueprint('auth', __name__)
 
@@ -54,7 +54,7 @@ def login():
         flash(f'Bem-vindo(a), {user.name.split()[0]}!', 'success')
 
         next_url = request.args.get('next')
-        if next_url and next_url.startswith('/'):
+        if next_url and is_safe_local_url(next_url):
             return redirect(next_url)
         return redirect(home_for_role(user.role))
 

@@ -5,13 +5,14 @@ from __future__ import annotations
 import hashlib
 import hmac
 import secrets
+from urllib.parse import urlparse
 
 from flask import Flask, abort, request, session
 
 
 CSRF_SESSION_KEY = "csrf_token"
 CSRF_FORM_FIELD = "csrf_token"
-SAFE_METHODS = {"GET", "HEAD", "OPTIONS", "TRACE"}
+SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 
 
 def _get_csrf_token() -> str:
@@ -25,6 +26,8 @@ def _get_csrf_token() -> str:
 
 def _validate_csrf() -> None:
     """Rejeita requisições mutáveis sem um token CSRF válido."""
+    if request.method == "TRACE":
+        abort(405)
     if request.method in SAFE_METHODS:
         return
 
@@ -56,3 +59,21 @@ def login_rate_limit_key() -> str:
     ip = request.remote_addr or "unknown"
     digest = hashlib.sha256(email.encode("utf-8")).hexdigest()[:16]
     return f"{ip}:{digest}"
+
+
+def is_safe_local_url(target: str | None) -> bool:
+    """Aceita apenas caminhos locais, evitando redirects para hosts externos."""
+    if not target:
+        return False
+    parsed = urlparse(target)
+    return (
+        not parsed.scheme
+        and not parsed.netloc
+        and target.startswith("/")
+        and not target.startswith("//")
+    )
+
+
+def local_redirect(target: str | None, fallback: str) -> str:
+    """Retorna um destino local validado ou o fallback informado."""
+    return target if is_safe_local_url(target) else fallback

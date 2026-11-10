@@ -206,6 +206,10 @@ def restore_backup(upload_stream, filename: str) -> None:
             extracted_db.unlink(missing_ok=True)
         except OSError:
             pass
+        try:
+            uploaded_zip.unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 def request_content_length(upload_stream) -> int | None:

@@ -51,7 +51,7 @@ def equipe_novo():
     errors = []
     if not name: errors.append('Informe o nome do membro.')
     if not email: errors.append('Informe o e-mail do membro.')
-    if len(raw_pw) < 6: errors.append('A senha inicial deve ter no mínimo 6 caracteres.')
+    if len(raw_pw) < 12: errors.append('A senha inicial deve ter no mínimo 12 caracteres.')
     if role not in EMPLOYEE_ROLES: errors.append('Cargo inválido.')
     if User.query.filter(func.lower(User.email) == email).first():
         errors.append('Este e-mail já está cadastrado.')
@@ -66,7 +66,7 @@ def equipe_novo():
         email=email,
         phone=request.form.get('phone') or None,
         role=role,
-        status=request.form.get('status', 'active'),
+        status=request.form.get('status', 'active') if request.form.get('status') in {'active', 'inactive'} else 'active',
         department=request.form.get('department') or None,
         password_hash=generate_password_hash(raw_pw),
         tenant_id=current.tenant_id,
@@ -96,13 +96,21 @@ def equipe_editar(id):
     u.name       = request.form.get('name', '').strip()
     u.email      = email
     u.phone      = request.form.get('phone') or None
-    u.role       = request.form.get('role', 'technician')
-    u.status     = request.form.get('status', 'active')
+    role = request.form.get('role', 'technician')
+    status = request.form.get('status', 'active')
+    if role not in EMPLOYEE_ROLES:
+        flash('Cargo inválido.', 'danger')
+        return redirect(url_for('equipe.equipe'))
+    if status not in {'active', 'inactive'}:
+        flash('Status inválido.', 'danger')
+        return redirect(url_for('equipe.equipe'))
+    u.role       = role
+    u.status     = status
     u.department = request.form.get('department') or None
     raw_pw = request.form.get('password', '').strip()
     if raw_pw:
-        if len(raw_pw) < 6:
-            flash('A nova senha deve ter no mínimo 6 caracteres.', 'danger')
+        if len(raw_pw) < 12:
+            flash('A nova senha deve ter no mínimo 12 caracteres.', 'danger')
             return redirect(url_for('equipe.equipe'))
         u.password_hash = generate_password_hash(raw_pw)
     u.updated_at = datetime.utcnow()

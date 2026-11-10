@@ -25,7 +25,7 @@ ROLE_ACCESS = {
                    'equipe', 'financeiro', 'relatorios', 'desempenho', 'mensagens', 'configuracoes'},
     'technician': {'dashboard', 'servicos', 'tarefas', 'agenda', 'mensagens', 'configuracoes'},
     'sales':      {'dashboard', 'servicos', 'clientes', 'financeiro', 'mensagens', 'configuracoes'},
-    'client':     {'portal', 'mensagens'},
+    'client':     {'portal'},
 }
 ROLE_LABELS = {
     'admin': 'Administrador', 'manager': 'Gerente', 'technician': 'Técnico',

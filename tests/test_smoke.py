@@ -12,6 +12,7 @@ os.environ.setdefault("SESSION_SECRET", "test-only-secret-not-for-production")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 from app import create_app
+from core.security import is_safe_local_url
 
 
 @pytest.fixture
@@ -70,3 +71,15 @@ def test_login_is_rate_limited(client):
 
     assert all(response.status_code == 200 for response in responses[:5])
     assert responses[-1].status_code == 429
+
+
+def test_redirect_targets_are_local_only():
+    assert is_safe_local_url("/dashboard?tab=seguranca")
+    assert not is_safe_local_url("//attacker.example/login")
+    assert not is_safe_local_url("https://attacker.example/login")
+
+
+def test_trace_is_not_an_allowed_method(client):
+    response = client.open("/login", method="TRACE")
+
+    assert response.status_code == 405

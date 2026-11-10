@@ -15,6 +15,8 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'false').lower() == 'true'
+    if ENV == 'production' and not SESSION_COOKIE_SECURE:
+        raise RuntimeError('SESSION_COOKIE_SECURE=true deve ser definida em produção.')
     SESSION_COOKIE_NAME = 'serviceflow_session'
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024
     RATELIMIT_STORAGE_URI = os.environ.get('RATELIMIT_STORAGE_URI', 'memory://')
