@@ -1,0 +1,151 @@
+/* Web3 Bento — adaptação Jinja/HTML do componente enviado.
+   A estrutura preserva a grade, tiles e estados interativos do prompt original. */
+.web3-dashboard { width: 100%; max-width: 1120px; margin: 0 auto; color: var(--bento-fg); }
+.web3-dashboard, .web3-dashboard * { box-sizing: border-box; }
+.web3-dashboard {
+  --bento-bg: #151414;
+  --bento-card: #211f1f;
+  --bento-card-2: #292626;
+  --bento-border: rgba(255,255,255,.105);
+  --bento-fg: #f4f1ed;
+  --bento-muted: #9d9791;
+  --bento-muted-2: #68635f;
+  --bento-amber: #dcff72;
+  --bento-lilac: #b9a0ff;
+  --bento-green: #8fe388;
+  --bento-red: #ff8c93;
+  --bento-radius: 26px;
+  --bento-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+}
+.web3-dashboard .bento-topbar { display:flex; justify-content:flex-end; align-items:center; gap:12px; margin:0 4px 12px; }
+.web3-dashboard .network-pill,
+.web3-dashboard .account-pill { display:inline-flex; align-items:center; gap:8px; border:1px solid var(--bento-border); border-radius:999px; padding:6px 12px; font-size:12px; font-weight:600; }
+.web3-dashboard .network-pill { color:var(--bento-muted); }
+.web3-dashboard .network-dot { width:8px; height:8px; border-radius:50%; background:var(--bento-amber); box-shadow:0 0 0 4px rgba(220,255,114,.08); }
+.web3-dashboard .account-pill { background:var(--bento-fg); color:#191717; font-family:var(--bento-mono); }
+.web3-dashboard .bento-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.web3-dashboard .bento-tile { position:relative; min-width:0; display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--bento-border); border-radius:var(--bento-radius); background:var(--bento-card); padding:20px; }
+.web3-dashboard .bento-tile:hover { border-color:rgba(255,255,255,.2); }
+.web3-dashboard .bento-span-2 { grid-column:span 2; }
+.web3-dashboard .bento-row-2 { grid-row:span 2; }
+.web3-dashboard .bento-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; color:var(--bento-muted); font-size:13px; font-weight:500; }
+.web3-dashboard .bento-title sup, .web3-dashboard .mono { font-family:var(--bento-mono); }
+.web3-dashboard .bento-muted { color:var(--bento-muted); }
+.web3-dashboard .bento-tile .mono { font-variant-numeric:tabular-nums; }
+.web3-dashboard .hero-tile { min-height:260px; }
+.web3-dashboard .hero-head { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; }
+.web3-dashboard .hero-greeting { font-size:34px; line-height:1.1; letter-spacing:-.04em; font-weight:650; }
+.web3-dashboard .hero-greeting strong { color:var(--bento-amber); }
+.web3-dashboard .hero-sub { margin-top:5px; color:var(--bento-muted); font-size:14px; }
+.web3-dashboard .hero-value-label { color:var(--bento-muted); font-size:12px; text-align:right; }
+.web3-dashboard .hero-value { margin-top:4px; font:600 40px/1 var(--bento-mono); letter-spacing:-.06em; text-align:right; }
+.web3-dashboard .hero-change { margin-top:8px; color:var(--bento-amber); font:12px var(--bento-mono); text-align:right; }
+.web3-dashboard .pnl-strip { display:flex; align-items:flex-end; gap:3px; min-height:64px; margin-top:auto; padding-top:22px; }
+.web3-dashboard .pnl-bar { flex:1; min-width:2px; border:0; border-radius:4px; background:var(--bento-amber); opacity:.45; transition:opacity .2s, height .7s cubic-bezier(.22,1,.36,1); }
+.web3-dashboard .pnl-bar:nth-child(3n) { background:var(--bento-lilac); }
+.web3-dashboard .pnl-bar:hover, .web3-dashboard .pnl-bar:focus { opacity:1; outline:none; }
+.web3-dashboard .hero-axis { display:flex; justify-content:space-between; margin-top:8px; color:var(--bento-muted); font:11px var(--bento-mono); }
+.web3-dashboard .hero-axis span:nth-child(2) { color:var(--bento-fg); }
+.web3-dashboard .cards-tile { min-height:260px; padding-bottom:0; }
+.web3-dashboard .card-stack-wrap { position:relative; flex:1; min-height:190px; margin:0 -20px; overflow:hidden; }
+.web3-dashboard .card-stack { position:absolute; left:50%; top:8px; width:calc(100% - 32px); max-width:300px; transform:translateX(-50%); }
+.web3-dashboard .bento-bank-card { position:absolute; left:0; width:100%; aspect-ratio:1.586; border:0; border-radius:13px; color:var(--ink); text-align:left; cursor:pointer; box-shadow:0 -10px 28px -14px rgba(0,0,0,.8); transition:top .6s cubic-bezier(.34,1.35,.64,1),transform .6s cubic-bezier(.34,1.35,.64,1); overflow:hidden; }
+.web3-dashboard .bento-bank-card::before { content:""; position:absolute; inset:0; background:linear-gradient(115deg,transparent 18%,rgba(255,255,255,.45) 40%,transparent 62%); background-size:260% 100%; opacity:.25; transition:background-position .7s; }
+.web3-dashboard .bento-bank-card:hover::before { background-position:100% 0; }
+.web3-dashboard .bank-card-content { position:relative; display:flex; justify-content:space-between; padding:16px; font-weight:700; font-size:13px; }
+.web3-dashboard .bank-card-chip { width:26px; height:20px; border-radius:5px; background:#eee5b7; box-shadow:inset 0 0 0 1px rgba(100,80,30,.3); }
+.web3-dashboard .card-stack-panel { position:absolute; inset:auto 0 0; height:86px; z-index:10; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; padding:0 20px 16px; background:rgba(33,31,31,.78); border-top:1px solid rgba(255,255,255,.1); backdrop-filter:blur(18px); }
+.web3-dashboard .card-stack-panel p { margin:0; }
+.web3-dashboard .gas-tile { min-height:260px; }
+.web3-dashboard .live-label { color:var(--bento-muted); font:11px var(--bento-mono); }
+.web3-dashboard .gauge { position:relative; width:150px; height:86px; margin:18px auto 0; }
+.web3-dashboard .gauge svg { width:100%; height:100%; overflow:visible; }
+.web3-dashboard .gauge-value { margin-top:4px; text-align:center; font:600 26px/1 var(--bento-mono); }
+.web3-dashboard .gauge-value small { color:var(--bento-muted); font:13px var(--bento-mono); }
+.web3-dashboard .gauge-sub { margin-top:6px; text-align:center; color:var(--bento-muted); font:11px var(--bento-mono); }
+.web3-dashboard .bento-pills { display:inline-flex; gap:2px; border:1px solid var(--bento-border); border-radius:999px; padding:2px; }
+.web3-dashboard .bento-pill { border:0; border-radius:999px; background:transparent; color:var(--bento-muted); padding:5px 9px; font:11px var(--bento-mono); cursor:pointer; }
+.web3-dashboard .bento-pill.active { background:var(--bento-fg); color:#181616; }
+.web3-dashboard .chart-tile { min-height:390px; }
+.web3-dashboard .chart-stats { display:flex; flex-wrap:wrap; align-items:flex-end; gap:28px; }
+.web3-dashboard .chart-stat-label { display:flex; align-items:center; gap:7px; color:var(--bento-muted); font-size:12px; }
+.web3-dashboard .legend-line { width:16px; height:3px; border-radius:3px; background:var(--bento-amber); }
+.web3-dashboard .legend-line.dashed { height:0; border-top:2px dashed var(--bento-muted); background:none; }
+.web3-dashboard .chart-stat-value { margin-top:5px; font:600 22px var(--bento-mono); }
+.web3-dashboard .chart-lead { margin-left:auto; border-radius:999px; padding:5px 10px; background:rgba(220,255,114,.15); color:var(--bento-amber); font:11px var(--bento-mono); }
+.web3-dashboard .bento-chart { width:100%; height:220px; margin-top:16px; }
+.web3-dashboard .bento-chart svg { width:100%; height:100%; }
+.web3-dashboard .chart-axis { display:flex; justify-content:space-between; color:var(--bento-muted); font:11px var(--bento-mono); }
+.web3-dashboard .allocation-total, .web3-dashboard .tile-number { font:600 22px var(--bento-mono); }
+.web3-dashboard .allocation-bar { display:flex; gap:4px; height:36px; margin-top:16px; }
+.web3-dashboard .allocation-bar span { min-width:3px; border-radius:8px; transition:flex-basis .8s; }
+.web3-dashboard .allocation-list { display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; margin:16px 0 0; padding:0; list-style:none; font-size:12px; }
+.web3-dashboard .allocation-list li { display:flex; justify-content:space-between; gap:8px; }
+.web3-dashboard .allocation-list li span:first-child::before { content:""; display:inline-block; width:8px; height:8px; margin-right:7px; border-radius:50%; background:var(--dot); }
+.web3-dashboard .allocation-list li span:last-child { color:var(--bento-muted); font-family:var(--bento-mono); }
+.web3-dashboard .staking-tile { min-height:390px; background:var(--bento-amber); color:#20230f; border-color:transparent; }
+.web3-dashboard .staking-tile .bento-title { color:rgba(32,35,15,.65); }
+.web3-dashboard .earning-pill { border-radius:999px; padding:4px 8px; background:rgba(32,35,15,.12); font:600 11px var(--bento-mono); }
+.web3-dashboard .staking-apy { margin-top:22px; font:600 52px/1 var(--bento-mono); letter-spacing:-.07em; }
+.web3-dashboard .staking-apy small { font-size:22px; }
+.web3-dashboard .staking-meta { margin-top:5px; font-size:12px; opacity:.7; }
+.web3-dashboard .payout-box { margin-top:20px; border-radius:16px; padding:12px; background:rgba(32,35,15,.1); font-size:12px; }
+.web3-dashboard .payout-row { display:flex; justify-content:space-between; font-weight:650; }
+.web3-dashboard .payout-track { height:6px; margin-top:9px; border-radius:999px; background:rgba(32,35,15,.14); overflow:hidden; }
+.web3-dashboard .payout-track span { display:block; height:100%; border-radius:inherit; background:#20230f; }
+.web3-dashboard .staking-dl { display:grid; gap:6px; margin:12px 0 0; font-size:12px; }
+.web3-dashboard .staking-dl div { display:flex; justify-content:space-between; }
+.web3-dashboard .rewards { margin-top:auto; padding-top:22px; }
+.web3-dashboard .rewards-label { opacity:.7; font-size:12px; font-weight:650; }
+.web3-dashboard .rewards-value { margin-top:4px; font:600 20px var(--bento-mono); }
+.web3-dashboard .epochs { display:flex; align-items:flex-end; gap:4px; height:48px; margin-top:16px; }
+.web3-dashboard .epochs span { flex:1; border-radius:3px 3px 0 0; background:#20230f; opacity:.3; }
+.web3-dashboard .claim-btn { width:100%; margin-top:16px; border:0; border-radius:15px; background:#20230f; color:var(--bento-amber); padding:11px; font-weight:700; cursor:pointer; }
+.web3-dashboard .range-tile { min-height:230px; }
+.web3-dashboard .range-price { font:600 22px var(--bento-mono); }
+.web3-dashboard .range-caption { color:var(--bento-muted); font:11px var(--bento-mono); }
+.web3-dashboard .range-track { position:relative; height:42px; margin-top:22px; }
+.web3-dashboard .range-track::before { content:""; position:absolute; left:0; right:0; top:50%; height:2px; background:var(--bento-muted-2); }
+.web3-dashboard .range-zone { position:absolute; top:50%; height:40px; transform:translateY(-50%); border-radius:10px; background:repeating-linear-gradient(135deg,rgba(220,255,114,.26) 0 6px,rgba(220,255,114,.12) 6px 12px); box-shadow:inset 0 0 0 1px rgba(220,255,114,.55); }
+.web3-dashboard .range-marker { position:absolute; top:50%; width:3px; height:56px; transform:translate(-50%,-50%); border-radius:999px; background:var(--bento-fg); transition:left .9s; }
+.web3-dashboard .range-values { display:flex; justify-content:space-between; color:var(--bento-muted); font:11px var(--bento-mono); }
+.web3-dashboard .range-fees { margin-top:auto; padding-top:16px; color:var(--bento-muted); font-size:12px; }
+.web3-dashboard .range-fees strong { color:var(--bento-fg); font:600 12px var(--bento-mono); }
+.web3-dashboard .blocks-tile { min-height:220px; }
+.web3-dashboard .block-head { display:flex; justify-content:space-between; align-items:flex-end; }
+.web3-dashboard .block-bars { display:flex; align-items:flex-end; gap:3px; height:64px; margin-top:18px; }
+.web3-dashboard .block-bars span { flex:1; border-radius:3px 3px 0 0; background:var(--bento-muted); opacity:.26; transform-origin:bottom; transition:height .4s; }
+.web3-dashboard .block-bars span:last-child { background:var(--bento-amber); opacity:1; }
+.web3-dashboard .block-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; padding-top:12px; border-top:1px solid var(--bento-border); }
+.web3-dashboard .block-metrics dt { color:var(--bento-muted); font-size:11px; }
+.web3-dashboard .block-metrics dd { margin-top:2px; font:600 13px var(--bento-mono); }
+.web3-dashboard .activity-tile { min-height:220px; }
+.web3-dashboard .activity-list { display:grid; gap:4px; margin:-4px -8px; padding:0; list-style:none; }
+.web3-dashboard .activity-row { display:flex; align-items:center; gap:12px; border-radius:16px; padding:8px; transition:background .2s; }
+.web3-dashboard .activity-row:hover { background:rgba(255,255,255,.06); }
+.web3-dashboard .activity-icon { display:grid; place-items:center; width:36px; height:36px; flex:0 0 auto; border-radius:12px; background:var(--bento-card-2); color:var(--bento-fg); }
+.web3-dashboard .activity-copy { min-width:0; flex:1; }
+.web3-dashboard .activity-copy strong, .web3-dashboard .activity-copy span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.web3-dashboard .activity-copy strong { font-size:13px; font-weight:550; }
+.web3-dashboard .activity-copy span { margin-top:2px; color:var(--bento-muted); font-size:11px; }
+.web3-dashboard .activity-amount { text-align:right; }
+.web3-dashboard .activity-amount strong { display:block; font:13px var(--bento-mono); }
+.web3-dashboard .activity-amount span { display:block; margin-top:2px; font:600 10px var(--bento-mono); color:var(--bento-muted); }
+.web3-dashboard .activity-amount span.pending { color:var(--bento-amber); }
+.web3-dashboard .activity-amount span.failed { color:var(--bento-red); }
+@media (max-width:1024px) {
+  .web3-dashboard .bento-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .web3-dashboard .hero-tile, .web3-dashboard .chart-tile, .web3-dashboard .blocks-tile, .web3-dashboard .activity-tile { grid-column:span 2; }
+  .web3-dashboard .cards-tile, .web3-dashboard .gas-tile, .web3-dashboard .allocation-tile, .web3-dashboard .staking-tile, .web3-dashboard .range-tile { grid-column:span 1; }
+}
+@media (max-width:640px) {
+  .web3-dashboard .bento-grid { grid-template-columns:1fr; }
+  .web3-dashboard .bento-span-2, .web3-dashboard .hero-tile, .web3-dashboard .chart-tile, .web3-dashboard .blocks-tile, .web3-dashboard .activity-tile { grid-column:span 1; }
+  .web3-dashboard .hero-head { flex-direction:column; gap:14px; }
+  .web3-dashboard .hero-value, .web3-dashboard .hero-value-label, .web3-dashboard .hero-change { text-align:left; }
+  .web3-dashboard .hero-value { font-size:32px; }
+  .web3-dashboard .chart-lead { margin-left:0; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .web3-dashboard *, .web3-dashboard *::before, .web3-dashboard *::after { animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
