@@ -16,7 +16,7 @@
   {% set cols = [
     ('todo',       'A Fazer',      '#7d8590', None,          'in_progress'),
     ('in_progress','Em Andamento', '#58a6ff', 'todo',        'review'),
-    ('review',     'Revisão',      '#6e56cf', 'in_progress', 'done'),
+    ('review',     'Revisão',      '#2e67ff', 'in_progress', 'done'),
     ('done',       'Concluído',    '#3fb950', 'review',      None),
   ] %}
   {% for status_key, col_label, col_color, prev_status, next_status in cols %}

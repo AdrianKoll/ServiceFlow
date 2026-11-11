@@ -247,7 +247,7 @@ tbody tr:hover {
 .badge-review {
   background: var(--primary-alpha);
   color: var(--primary);
-  border-color: rgba(37, 99, 235, 0.3);
+  border-color: rgba(46, 103, 255, 0.3);
 }
 .badge-active {
   background: rgba(63, 185, 80, 0.12);
@@ -456,7 +456,7 @@ tbody tr:hover {
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--bg-card), rgba(37, 99, 235, 0.1));
+  background: linear-gradient(135deg, var(--bg-card), rgba(46, 103, 255, 0.1));
   box-shadow: var(--shadow-sm);
 }
 .sidebar-plan-top {
@@ -527,7 +527,7 @@ tbody tr:hover {
 }
 .pricing-card.highlight {
   border-color: var(--primary);
-  box-shadow: 0 18px 50px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 18px 50px rgba(46, 103, 255, 0.15);
 }
 .pricing-card.active:after {
   content: "Plano atual";
@@ -663,7 +663,7 @@ tbody tr:hover {
   justify-content: space-between;
   gap: 18px;
   margin-bottom: 18px;
-  background: linear-gradient(135deg, var(--bg-card), rgba(37, 99, 235, 0.09));
+  background: linear-gradient(135deg, var(--bg-card), rgba(46, 103, 255, 0.09));
 }
 .subscription-main {
   display: grid;
@@ -768,11 +768,11 @@ tbody tr:hover {
   border-radius: 999px;
   background: var(--primary-alpha);
   color: var(--primary);
-  border: 1px solid rgba(37, 99, 235, 0.25);
+  border: 1px solid rgba(46, 103, 255, 0.25);
 }
 .pro-lock-card {
-  border: 1px solid rgba(37, 99, 235, 0.28);
-  background: linear-gradient(135deg, var(--bg-card), rgba(37, 99, 235, 0.1));
+  border: 1px solid rgba(46, 103, 255, 0.28);
+  background: linear-gradient(135deg, var(--bg-card), rgba(46, 103, 255, 0.1));
 }
 .pro-lock-card .lock-title {
   font-size: 15px;
@@ -843,7 +843,7 @@ tbody tr:hover {
   grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
   gap: 18px;
   margin-bottom: 18px;
-  background: linear-gradient(135deg, var(--bg-card), rgba(37, 99, 235, 0.1));
+  background: linear-gradient(135deg, var(--bg-card), rgba(46, 103, 255, 0.1));
 }
 .billing-overview-main {
   display: flex;
@@ -859,7 +859,7 @@ tbody tr:hover {
   background: var(--primary);
   color: white;
   font-weight: 900;
-  box-shadow: 0 14px 35px rgba(37, 99, 235, 0.24);
+  box-shadow: 0 14px 35px rgba(46, 103, 255, 0.24);
   flex: 0 0 auto;
 }
 .billing-overview-main h2 {

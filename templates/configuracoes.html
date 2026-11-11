@@ -78,7 +78,7 @@
               <div style="height:1px;background:var(--border);margin:16px 0"></div>
               <div style="font-size:13px;font-weight:600;margin-bottom:6px">Cor do avatar sem foto</div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px" id="avatarSwatches">
-                {% for c in ['#2563eb','#3b82f6','#60a5fa','#0891b2','#16a34a','#ca8a04','#dc2626','#db2777','#374151','#0f766e'] %}
+                {% for c in ['#2e67ff','#2e67ff','#2b65ff','#00cdcc','#00eeba','#f9ff40','#ff2822','#2e67ff','#0e142b','#00cdcc'] %}
                 <button type="button" data-acolor="{{ c }}"
                   style="width:26px;height:26px;border-radius:50%;background:{{ c }};border:3px solid {% if c == avatar_color %}white{% else %}transparent{% endif %};
                   box-shadow:{% if c == avatar_color %}0 0 0 2px {{ c }}{% else %}none{% endif %};cursor:pointer;outline:none;transition:transform .15s">
@@ -207,9 +207,9 @@
 
           {# Paleta de presets #}
           {% set presets = [
-            ('#2563eb','Azul'),('#3b82f6','Azul claro'),('#6e56cf','Violeta'),
-            ('#0891b2','Ciano'), ('#16a34a','Verde'), ('#ca8a04','Âmbar'),
-            ('#dc2626','Vermelho'),('#db2777','Rosa'),('#374151','Cinza'),
+            ('#2e67ff','Azul'),('#2e67ff','Azul claro'),('#2e67ff','Violeta'),
+            ('#00cdcc','Ciano'), ('#00eeba','Verde'), ('#f9ff40','Âmbar'),
+            ('#ff2822','Vermelho'),('#2e67ff','Rosa'),('#0e142b','Cinza'),
           ] %}
           <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px" id="colorSwatches">
             {% for hex, name in presets %}
@@ -355,7 +355,7 @@
         </div>
 
         {% if backup_error %}
-        <div style="padding:10px 12px;border-radius:var(--radius-sm);background:rgba(239,68,68,.12);color:#ef4444;font-size:12px;margin-bottom:12px">{{ backup_error }}</div>
+        <div style="padding:10px 12px;border-radius:var(--radius-sm);background:rgba(255,40,34,.12);color:#ff2822;font-size:12px;margin-bottom:12px">{{ backup_error }}</div>
         {% endif %}
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px">
@@ -396,8 +396,8 @@
         </form>
       </div>
 
-      <div class="card" style="padding:20px;border:1px solid rgba(239,68,68,.35);background:linear-gradient(135deg,rgba(239,68,68,.08),transparent)">
-        <div style="font-size:14px;font-weight:800;color:#ef4444;margin-bottom:4px">Resetar dados operacionais</div>
+      <div class="card" style="padding:20px;border:1px solid rgba(255,40,34,.35);background:linear-gradient(135deg,rgba(255,40,34,.08),transparent)">
+        <div style="font-size:14px;font-weight:800;color:#ff2822;margin-bottom:4px">Resetar dados operacionais</div>
         <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5;margin-bottom:14px">Remove clientes, serviços, tarefas, agenda, financeiro, mensagens, notificações e usuários extras. A conta admin atual é preservada e um backup é criado antes do reset.</div>
         <form action="{{ url_for('configuracoes.resetar_dados') }}" method="post" onsubmit="return confirm('Tem certeza que deseja resetar os dados operacionais? Um backup será criado antes da limpeza.');">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -445,7 +445,7 @@
             <div>
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                 <div style="font-size:13.5px;font-weight:600">{{ item.name }}</div>
-                <span style="font-size:10px;padding:3px 7px;border-radius:999px;background:{% if item.connected %}rgba(34,197,94,.14){% else %}var(--bg-hover){% endif %};color:{% if item.connected %}#22c55e{% else %}var(--text-muted){% endif %};border:1px solid var(--border)">
+                <span style="font-size:10px;padding:3px 7px;border-radius:999px;background:{% if item.connected %}rgba(0,238,186,.14){% else %}var(--bg-hover){% endif %};color:{% if item.connected %}#00eeba{% else %}var(--text-muted){% endif %};border:1px solid var(--border)">
                   {% if item.connected %}Conectado{% else %}{{ item.stage }}{% endif %}
                 </span>
               </div>
@@ -543,7 +543,7 @@
   var btnReset = document.getElementById('btnResetAparencia');
   if (btnReset) {
     btnReset.addEventListener('click', function(){
-      applyColorPreview('#2563eb');
+      applyColorPreview('#2e67ff');
       applyFontPreview('14');
     });
   }
