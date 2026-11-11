@@ -12,9 +12,9 @@ def register_context_processors(app):
         unread_count  = get_unread_count()
         from flask import session, url_for
         theme         = session.get('theme', 'dark')
-        primary_color = session.get('primary_color', '#6366f1')
+        primary_color = session.get('primary_color', '#2563eb')
         font_size     = session.get('font_size', '14')
-        avatar_color  = session.get('avatar_color', '#6366f1')
+        avatar_color  = session.get('avatar_color', '#2563eb')
         avatar_url = url_for('static', filename=current_user.avatar) if current_user and current_user.avatar else None
         role          = current_user.role if current_user else 'admin'
         current_plan  = get_current_plan(current_user) if current_user else PLAN_CATALOG['basic']

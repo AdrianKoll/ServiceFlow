@@ -6,7 +6,7 @@
 
 /* ── Tokens: tema escuro (padrão) ──
    Fonte: hsl(225 21% 7%), hsl(225 22% 11%), hsl(217 33% 17%)
-   Primary: hsl(243 75% 59%) = indigo #6366f1
+   Primary: azul ServiceFlow
    ─────────────────────────────────────── */
 :root {
   color-scheme: dark;
@@ -38,13 +38,13 @@
 
   /* ──────────────────────────────────────────
 
-     Primária — Indigo
+     Primária — Azul ServiceFlow
 
      ────────────────────────────────────────── */
-  --primary: #6366f1;
-  --primary-hover: #5558e3;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
   --primary-fg: #ffffff;
-  --primary-alpha: rgba(99, 102, 241, 0.15);
+  --primary-alpha: rgba(37, 99, 235, 0.15);
 
   /* ──────────────────────────────────────────
 
@@ -103,13 +103,13 @@
 
   /* ──────────────────────────────────────────
 
-     Primária — Indigo (igual no escuro)
+     Primária — Azul ServiceFlow
 
      ────────────────────────────────────────── */
-  --primary: #6366f1;
-  --primary-hover: #5558e3;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
   --primary-fg: #ffffff;
-  --primary-alpha: rgba(99, 102, 241, 0.1);
+  --primary-alpha: rgba(37, 99, 235, 0.1);
 
   /* ──────────────────────────────────────────
 
