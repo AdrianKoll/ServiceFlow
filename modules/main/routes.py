@@ -27,8 +27,8 @@ def dashboard():
 
     recent_services = db.session.query(
         Service, Client.name.label('client_name'), User.name.label('resp_name')
-    ).outerjoin(Client, Service.client_id == Client.id)\
-     .outerjoin(User, Service.responsible_id == User.id)\
+    ).outerjoin(Client, (Service.client_id == Client.id) & (Client.tenant_id == current_user.tenant_id))\
+     .outerjoin(User, (Service.responsible_id == User.id) & (User.tenant_id == current_user.tenant_id))\
      .filter(Service.tenant_id == current_user.tenant_id)\
      .order_by(Service.created_at.desc()).limit(5).all()
 

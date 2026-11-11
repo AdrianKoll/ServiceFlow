@@ -18,7 +18,7 @@ bp = Blueprint('agenda', __name__)
 @module_required('agenda')
 def agenda():
     current_user = get_current_user()
-    events   = scoped_query(Event).outerjoin(User, Event.user_id == User.id)\
+    events   = scoped_query(Event).outerjoin(User, (Event.user_id == User.id) & (User.tenant_id == current_user.tenant_id))\
         .order_by(Event.start_date).all()
     users    = User.query.filter(User.status == 'active',
                                   User.role.in_(EMPLOYEE_ROLES),

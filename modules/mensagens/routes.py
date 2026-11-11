@@ -36,7 +36,7 @@ def mensagens():
         active_thread = _thread_for_user(thread_id, current_user)
         if active_thread:
             thread_messages = db.session.query(Message, User.name.label('sender_name'))\
-                .outerjoin(User, Message.sender_id == User.id)\
+                .outerjoin(User, (Message.sender_id == User.id) & (User.tenant_id == current_user.tenant_id))\
                 .filter(Message.thread_id == active_thread.id)\
                 .order_by(Message.created_at).all()
 

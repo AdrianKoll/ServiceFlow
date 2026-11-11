@@ -21,8 +21,8 @@ def financeiro():
     type_f = request.args.get('type', '')
     q = db.session.query(Transaction, Client.name.label('client_name'),
                          Service.title.label('service_title'))\
-        .outerjoin(Client, Transaction.client_id == Client.id)\
-        .outerjoin(Service, Transaction.service_id == Service.id)\
+        .outerjoin(Client, (Transaction.client_id == Client.id) & (Client.tenant_id == current_user.tenant_id))\
+        .outerjoin(Service, (Transaction.service_id == Service.id) & (Service.tenant_id == current_user.tenant_id))\
         .filter(Transaction.tenant_id == current_user.tenant_id)
     if type_f: q = q.filter(Transaction.type == type_f)
     transactions  = q.order_by(Transaction.created_at.desc()).all()

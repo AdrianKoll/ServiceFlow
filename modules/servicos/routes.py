@@ -22,8 +22,8 @@ def servicos():
     status_f = request.args.get('status', '')
     search_f = request.args.get('search', '')
     q = db.session.query(Service, Client.name.label('client_name'), User.name.label('resp_name'))\
-        .outerjoin(Client, Service.client_id == Client.id)\
-        .outerjoin(User, Service.responsible_id == User.id)\
+        .outerjoin(Client, (Service.client_id == Client.id) & (Client.tenant_id == current_user.tenant_id))\
+        .outerjoin(User, (Service.responsible_id == User.id) & (User.tenant_id == current_user.tenant_id))\
         .filter(Service.tenant_id == current_user.tenant_id)
     if status_f: q = q.filter(Service.status == status_f)
     if search_f: q = q.filter(Service.title.ilike(f'%{search_f}%'))
