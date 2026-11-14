@@ -1,9 +1,21 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, current_app, jsonify, render_template, redirect, url_for, request, flash, send_from_directory
 from core.auth import get_current_user, home_for_role
 from services.plans import PLAN_CATALOG, PAYMENT_METHODS
 
 bp = Blueprint('public', __name__)
 PLANS = list(PLAN_CATALOG.values())
+
+
+@bp.route('/healthz')
+def healthz():
+    """Endpoint público de prontidão usado pelo runtime permanente."""
+    return jsonify(status='ok'), 200
+
+
+@bp.route('/manus-routes.json')
+def route_manifest():
+    """Entrega o manifesto das páginas para a infraestrutura de publicação."""
+    return send_from_directory(current_app.root_path, 'manus-routes.json')
 
 
 @bp.route('/')
