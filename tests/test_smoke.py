@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import json
 from pathlib import Path
 
 import pytest
@@ -13,7 +14,7 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 from app import create_app
 from core.security import is_safe_local_url
-from models import Client as ClientModel, Tenant, User, db
+from models import Client as ClientModel, Service, Task, Transaction, Tenant, User, db
 from werkzeug.security import generate_password_hash
 
 
@@ -151,3 +152,49 @@ def test_tenant_cannot_associate_service_with_foreign_client(client):
         },
     )
     assert response.status_code == 404
+
+
+def test_dashboard_uses_tenant_data_and_light_theme(client):
+    user_id, client_id, _ = _create_two_tenants(client.application)
+    with client.application.app_context():
+        user = db.session.get(User, user_id)
+        db.session.add_all([
+            Service(
+                tenant_id=user.tenant_id,
+                title="Serviço real",
+                client_id=client_id,
+                status="completed",
+                value=1250,
+            ),
+            Task(
+                tenant_id=user.tenant_id,
+                title="Tarefa aberta",
+                status="todo",
+                assignee_id=user_id,
+            ),
+            Transaction(
+                tenant_id=user.tenant_id,
+                description="Receita real",
+                type="income",
+                amount=1250,
+                status="paid",
+            ),
+        ])
+        db.session.commit()
+
+    _login_as_session(client, user_id)
+    with client.session_transaction() as session:
+        session["theme"] = "light"
+    response = client.get("/dashboard")
+    html = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert '<html lang="pt-BR" class="light">' in html
+    assert "Serviço real" in html or "Receita real" in html
+    assert "12.1h" not in html
+    assert "in range" not in html
+    ranges_match = re.search(r'data-ranges=\'([^\']+)\'', html)
+    assert ranges_match
+    ranges = json.loads(ranges_match.group(1))
+    assert set(ranges) == {"week", "month", "year"}
+    assert len(ranges["month"]["created"]) == 30
