@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from sqlalchemy import extract, func, and_
@@ -98,6 +98,15 @@ def core_kpis() -> dict[str, Any]:
         "task_completion_rate": _safe_pct(completed_tasks, completed_tasks + open_tasks),
         "overdue_services": overdue_services,
         "overdue_tasks": overdue_tasks,
+        "open_tasks": open_tasks,
+        "records_month": services_month + completed_tasks + open_tasks,
+        "month_days_elapsed": max(1, (today.date() - month_start.date()).days + 1),
+        "income_previous_month": float(db.session.query(func.sum(Transaction.amount)).filter(
+            Transaction.tenant_id == tenant_id,
+            Transaction.type == "income",
+            Transaction.created_at >= prev_month_start,
+            Transaction.created_at < prev_month_end,
+        ).scalar() or 0),
     }
 
 
@@ -117,6 +126,22 @@ def service_activity_chart(months: int = 6) -> tuple[list[str], list[int], list[
         )
         created.append(base.count())
         completed.append(base.filter(Service.status == "completed").count())
+    return labels, created, completed
+
+
+def service_activity_days(days: int = 30) -> tuple[list[str], list[int], list[int]]:
+    """Retorna criação e conclusão de serviços por dia no tenant atual."""
+    today = _now().date()
+    labels, created, completed = [], [], []
+    services = scoped_query(Service)
+    for offset in range(days - 1, -1, -1):
+        day = today - timedelta(days=offset)
+        start = datetime(day.year, day.month, day.day)
+        end = start + timedelta(days=1)
+        daily = services.filter(Service.created_at >= start, Service.created_at < end)
+        labels.append(day.strftime("%d/%m"))
+        created.append(daily.count())
+        completed.append(daily.filter(Service.status == "completed").count())
     return labels, created, completed
 
 

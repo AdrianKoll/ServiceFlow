@@ -11,6 +11,7 @@ from services.analytics import (
     employee_performance,
     recent_activity,
     finance_chart,
+    service_activity_days,
 )
 
 bp = Blueprint('main', __name__)
@@ -21,7 +22,8 @@ bp = Blueprint('main', __name__)
 def dashboard():
     current_user = get_current_user()
     kpis = core_kpis()
-    labels, created, completed = service_activity_chart(6)
+    labels, created, completed = service_activity_chart(12)
+    daily_labels, daily_created, daily_completed = service_activity_days(30)
     finance_labels, finance_income, finance_expense = finance_chart(6)
     status_labels, status_data = status_distribution()
 
@@ -46,5 +48,25 @@ def dashboard():
         finance_labels=json.dumps(finance_labels),
         finance_income=json.dumps(finance_income),
         finance_expense=json.dumps(finance_expense),
+        chart_ranges=json.dumps({
+            'week': {
+                'labels': daily_labels[-7:],
+                'created': daily_created[-7:],
+                'completed': daily_completed[-7:],
+            },
+            'month': {
+                'labels': daily_labels,
+                'created': daily_created,
+                'completed': daily_completed,
+            },
+            'year': {
+                'labels': labels,
+                'created': created,
+                'completed': completed,
+            },
+        }),
+        daily_created=json.dumps(daily_created),
+        daily_peak=max(daily_created or [0]),
+        throughput_daily=round(kpis['services_month'] / kpis['month_days_elapsed'], 1),
         **kpis,
     )

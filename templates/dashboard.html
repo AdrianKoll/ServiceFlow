@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — ServiceFlow Pro{% endblock %}
 {% block content %}
-{% set alloc_services = services_month + 1 %}
-{% set alloc_clients = client_total + 1 %}
-{% set alloc_tasks = overdue_tasks + 1 %}
-{% set alloc_team = user_total + 1 %}
-{% set alloc_total = alloc_services + alloc_clients + alloc_tasks + alloc_team + 6 %}
-<div class="web3-dashboard" data-history='{{ chart_created | safe }}' data-benchmark='{{ chart_completed | safe }}' data-locale="pt-BR">
+{% set alloc_services = services_month %}
+{% set alloc_clients = client_total %}
+{% set alloc_tasks = open_tasks %}
+{% set alloc_team = user_total %}
+{% set alloc_total = alloc_services + alloc_clients + alloc_tasks + alloc_team %}
+{% set alloc_scale = alloc_total if alloc_total else 1 %}
+<div class="web3-dashboard" data-ranges='{{ chart_ranges | safe }}' data-locale="pt-BR">
   <nav class="bento-topbar" aria-label="Contexto do dashboard">
     <span class="network-pill"><span class="network-dot" aria-hidden="true"></span>ServiceFlow Network</span>
     <span class="account-pill">{{ current_user_name.split()[0] | lower }}.flow</span>
@@ -25,16 +26,16 @@
           <p class="hero-change">{{ '+' if balance_month >= 0 else '−' }}{{ fmt_brl(balance_month | abs) }} · mês atual</p>
         </div>
       </div>
-      <div class="pnl-strip" aria-label="Atividade diária do mês">
-        {% for i in range(30) %}
-        <button type="button" class="pnl-bar" style="height:{{ 24 + ((i * 29 + services_month * 7) % 70) }}%" aria-label="Dia {{ i + 1 }}"></button>
+      <div class="pnl-strip" aria-label="Serviços criados por dia no mês">
+        {% for value in daily_created %}
+        <button type="button" class="pnl-bar" style="height:{{ (8 + ((value | int / (daily_peak or 1)) * 84)) | round(1) }}%" aria-label="{{ value }} serviço(s) criado(s)"></button>
         {% endfor %}
       </div>
       <div class="hero-axis"><span>01/{{ now().strftime('%m') }}</span><span>Fluxo diário</span><span>Hoje</span></div>
     </section>
 
     <section class="bento-tile cards-tile">
-      <div class="bento-title"><span>Workspaces <sup>3</sup></span></div>
+      <div class="bento-title"><span>Resumo operacional</span></div>
       <div class="card-stack-wrap">
         <div class="card-stack" id="serviceCardStack">
           <button type="button" class="bento-bank-card" style="top:92px;transform:translateY(0) scale(.89);--ink:#0e142b;background:linear-gradient(135deg,#00cdcc,#2e67ff)" data-card="0" aria-label="Financeiro, trazer para frente"><span class="bank-card-content"><span><span class="bank-card-chip"></span><br/>Financeiro</span><span>**** {{ '%04d' % ((income_month | int) % 10000) }}</span></span></button>
@@ -69,9 +70,9 @@
 
     <section class="bento-tile allocation-tile">
       <div class="bento-title"><span>Distribuição</span></div>
-      <p class="allocation-total">{{ client_total + services_month + user_total }}</p>
-      <div class="allocation-bar"><span style="flex-basis:{{ alloc_services / alloc_total * 100 }}%;background:var(--bento-amber)"></span><span style="flex-basis:{{ alloc_clients / alloc_total * 100 }}%;background:var(--bento-lilac)"></span><span style="flex-basis:{{ alloc_tasks / alloc_total * 100 }}%;background:#323e62"></span><span style="flex-basis:{{ alloc_team / alloc_total * 100 }}%;background:#7b7e8c"></span><span style="flex:1;background:#26272e"></span></div>
-      <ul class="allocation-list"><li style="--dot:var(--bento-amber)"><span>Serviços</span><span>{{ (alloc_services / alloc_total * 100) | round(1) }}%</span></li><li style="--dot:var(--bento-lilac)"><span>Clientes</span><span>{{ (alloc_clients / alloc_total * 100) | round(1) }}%</span></li><li style="--dot:#323e62"><span>Tarefas</span><span>{{ (alloc_tasks / alloc_total * 100) | round(1) }}%</span></li><li style="--dot:#7b7e8c"><span>Equipe</span><span>{{ (alloc_team / alloc_total * 100) | round(1) }}%</span></li></ul>
+      <p class="allocation-total">{{ alloc_total }}</p>
+      <div class="allocation-bar"><span style="flex-basis:{{ alloc_services / alloc_scale * 100 }}%;background:var(--bento-amber)"></span><span style="flex-basis:{{ alloc_clients / alloc_scale * 100 }}%;background:var(--bento-lilac)"></span><span style="flex-basis:{{ alloc_tasks / alloc_scale * 100 }}%;background:#323e62"></span><span style="flex-basis:{{ alloc_team / alloc_scale * 100 }}%;background:#7b7e8c"></span></div>
+      <ul class="allocation-list"><li style="--dot:var(--bento-amber)"><span>Serviços</span><span>{{ (alloc_services / alloc_scale * 100) | round(1) }}%</span></li><li style="--dot:var(--bento-lilac)"><span>Clientes</span><span>{{ (alloc_clients / alloc_scale * 100) | round(1) }}%</span></li><li style="--dot:#323e62"><span>Tarefas abertas</span><span>{{ (alloc_tasks / alloc_scale * 100) | round(1) }}%</span></li><li style="--dot:#7b7e8c"><span>Equipe</span><span>{{ (alloc_team / alloc_scale * 100) | round(1) }}%</span></li></ul>
     </section>
 
     <section class="bento-tile staking-tile bento-row-2">
@@ -83,17 +84,19 @@
     </section>
 
     <section class="bento-tile range-tile">
-      <div class="bento-title"><span>Meta mensal · {{ service_growth }}%</span><span class="earning-pill" style="color:var(--bento-amber);background:rgba(249,255,64,.15)">in range</span></div>
-      <p class="range-price">{{ fmt_brl(income_month) }}</p><p class="range-caption">receita atual</p>
-      <div class="range-track"><div class="range-zone" style="left:15%;width:70%"></div><div class="range-marker" style="left:{{ [completion_rate, 98] | min }}%"></div></div><div class="range-values"><span>0</span><span>meta</span></div>
+      <div class="bento-title"><span>Receita do mês</span><span class="earning-pill" style="color:var(--bento-amber);background:rgba(249,255,64,.15)">{{ service_growth }}% vs anterior</span></div>
+      <p class="range-price">{{ fmt_brl(income_month) }}</p><p class="range-caption">entradas registradas</p>
+      {% set finance_scale = [income_month + expense_month, 1] | max %}
+      <div class="finance-bars" aria-label="Entradas e despesas do mês"><span style="width:{{ income_month / finance_scale * 100 }}%" title="Entradas"></span><span style="width:{{ expense_month / finance_scale * 100 }}%" title="Despesas"></span></div>
+      <div class="range-values"><span>Entradas {{ fmt_brl(income_month) }}</span><span>Despesas {{ fmt_brl(expense_month) }}</span></div>
       <p class="range-fees">Saldo disponível <strong>{{ fmt_brl(balance_month) }}</strong></p>
     </section>
 
     <section class="bento-tile bento-span-2 blocks-tile">
       <div class="bento-title"><span>Activity stream</span><span class="live-label">agora</span></div>
-      <div class="block-head"><div><p class="tile-number">#{{ '%07d' % (services_month + client_total + 1000) }}</p><p class="bento-muted mono" style="font-size:11px">{{ services_month + client_total }} registros · {{ completion_rate }}% completo</p></div><p class="bento-muted mono" style="font-size:11px">ritmo diário</p></div>
-      <div class="block-bars" aria-hidden="true">{% for i in range(42) %}<span style="height:{{ 28 + ((i * 37 + services_month) % 70) }}%"></span>{% endfor %}</div>
-      <dl class="block-metrics"><div><dt>Tempo médio</dt><dd>12.1h</dd></div><div><dt>Execução</dt><dd>{{ completion_rate }}%</dd></div><div><dt>Throughput</dt><dd>{{ services_month + 1 }}/dia</dd></div></dl>
+      <div class="block-head"><div><p class="tile-number">{{ records_month }}</p><p class="bento-muted mono" style="font-size:11px">registros operacionais no mês</p></div><p class="bento-muted mono" style="font-size:11px">ritmo diário</p></div>
+      <div class="block-bars" aria-label="Serviços criados por dia">{% for value in daily_created %}<span style="height:{{ (8 + ((value | int / (daily_peak or 1)) * 84)) | round(1) }}%" title="{{ value }} serviço(s)"></span>{% endfor %}</div>
+      <dl class="block-metrics"><div><dt>Serviços</dt><dd>{{ services_month }}</dd></div><div><dt>Execução</dt><dd>{{ completion_rate }}%</dd></div><div><dt>Ritmo/dia</dt><dd>{{ throughput_daily }}</dd></div></dl>
     </section>
 
     <section class="bento-tile bento-span-2 activity-tile">
@@ -124,9 +127,22 @@
       item.setAttribute('aria-pressed', depth === 0 ? 'true' : 'false');
     });
   }));
-  root.querySelectorAll('[data-range] .bento-pill').forEach((pill) => pill.addEventListener('click', () => {
+  const ranges = JSON.parse(root.dataset.ranges || '{}');
+  const updateChart = (range) => {
+    const values = ranges[range] || ranges.month || {};
+    const main = toPoints(values.created, 640, 220), ref = toPoints(values.completed, 640, 220);
+    const mainPath = document.getElementById('bentoMainPath'), refPath = document.getElementById('bentoBenchmarkPath'), areaPath = document.getElementById('bentoAreaPath');
+    if (!main) {
+      mainPath.setAttribute('d', ''); refPath.setAttribute('d', ''); areaPath.setAttribute('d', '');
+      return;
+    }
+    const d = pathD(main), refD = pathD(ref);
+    mainPath.setAttribute('d', d); refPath.setAttribute('d', refD); areaPath.setAttribute('d', `${d} L 640 220 L 0 220 Z`);
+  };
+  root.querySelectorAll('[data-range] .bento-pill').forEach((pill, index) => pill.addEventListener('click', () => {
     root.querySelectorAll('[data-range] .bento-pill').forEach((p) => p.classList.remove('active'));
     pill.classList.add('active');
+    updateChart(['week', 'month', 'year'][index] || 'month');
   }));
   const toPoints = (values, width, height) => {
     const nums = (values || []).map(Number).filter(Number.isFinite);
@@ -134,16 +150,9 @@
     const lo = Math.min(...nums), hi = Math.max(...nums), span = hi - lo || 1;
     return nums.map((v, i) => `${(i / Math.max(1, nums.length - 1)) * width},${height - 16 - ((v - lo) / span) * (height - 40)}`).join(' ');
   };
-  const history = JSON.parse(root.dataset.history || '[]');
-  const benchmark = JSON.parse(root.dataset.benchmark || '[]');
-  const main = toPoints(history, 640, 220), ref = toPoints(benchmark, 640, 220);
   const pathD = (points) => points ? points.split(' ').map((pair, i) => { const [x, y] = pair.split(','); return `${i ? 'L' : 'M'} ${x} ${y}`; }).join(' ') : '';
-  if (main) {
-    const mainPath = document.getElementById('bentoMainPath'), refPath = document.getElementById('bentoBenchmarkPath'), areaPath = document.getElementById('bentoAreaPath');
-    const d = pathD(main), refD = pathD(ref);
-    mainPath.setAttribute('d', d); refPath.setAttribute('d', refD); areaPath.setAttribute('d', `${d} L 640 220 L 0 220 Z`);
-    if (!reduce) { mainPath.style.strokeDasharray = '1'; mainPath.style.strokeDashoffset = '1'; mainPath.style.strokeDashoffset = '0'; }
-  }
+  updateChart('month');
+  if (!reduce) document.getElementById('bentoMainPath').style.strokeDasharray = '1';
   document.getElementById('bentoActionButton')?.addEventListener('click', () => document.querySelector('.dash-recent-card')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }));
 })();
 </script>
