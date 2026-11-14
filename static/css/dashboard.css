@@ -132,7 +132,7 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: rgba(110, 86, 207, 0.15);
+  background: rgba(46, 103, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,7 +221,7 @@
   background: var(--danger);
 }
 .risk-card {
-  border-color: rgba(248, 81, 73, 0.35);
+  border-color: rgba(255, 40, 34, 0.35);
 }
 .insight-grid {
   display: grid;

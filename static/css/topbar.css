@@ -301,7 +301,7 @@
   color: var(--danger);
 }
 .profile-menu-item.danger:hover {
-  background: rgba(248, 81, 73, 0.1);
+  background: rgba(255, 40, 34, 0.1);
 }
 .profile-menu-divider {
   height: 1px;

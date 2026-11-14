@@ -42,23 +42,23 @@
   font-size: 13px;
 }
 .flash.success {
-  background: rgba(63, 185, 80, 0.1);
+  background: rgba(0, 238, 186, 0.1);
   color: var(--success);
-  border: 1px solid rgba(63, 185, 80, 0.2);
+  border: 1px solid rgba(0, 238, 186, 0.2);
 }
 .flash.error,
 .flash.danger {
-  background: rgba(248, 81, 73, 0.1);
+  background: rgba(255, 40, 34, 0.1);
   color: var(--danger);
-  border: 1px solid rgba(248, 81, 73, 0.2);
+  border: 1px solid rgba(255, 40, 34, 0.2);
 }
 .flash.info {
-  background: rgba(88, 166, 255, 0.1);
+  background: rgba(46, 103, 255, 0.1);
   color: var(--info);
-  border: 1px solid rgba(88, 166, 255, 0.2);
+  border: 1px solid rgba(46, 103, 255, 0.2);
 }
 .flash.warning {
-  background: rgba(210, 153, 34, 0.1);
+  background: rgba(249, 255, 64, 0.1);
   color: var(--warning);
-  border: 1px solid rgba(210, 153, 34, 0.2);
+  border: 1px solid rgba(249, 255, 64, 0.2);
 }

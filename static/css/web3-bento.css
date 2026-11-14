@@ -53,8 +53,8 @@
 .web3-dashboard .bento-bank-card::before { content:""; position:absolute; inset:0; background:linear-gradient(115deg,transparent 18%,rgba(255,255,255,.45) 40%,transparent 62%); background-size:260% 100%; opacity:.25; transition:background-position .7s; }
 .web3-dashboard .bento-bank-card:hover::before { background-position:100% 0; }
 .web3-dashboard .bank-card-content { position:relative; display:flex; justify-content:space-between; padding:16px; font-weight:700; font-size:13px; }
-.web3-dashboard .bank-card-chip { width:26px; height:20px; border-radius:5px; background:#f9ff40; box-shadow:inset 0 0 0 1px rgba(100,80,30,.3); }
-.web3-dashboard .card-stack-panel { position:absolute; inset:auto 0 0; height:86px; z-index:10; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; padding:0 20px 16px; background:rgba(33,31,31,.78); border-top:1px solid rgba(255,255,255,.1); backdrop-filter:blur(18px); }
+.web3-dashboard .bank-card-chip { width:26px; height:20px; border-radius:5px; background:#f9ff40; box-shadow:inset 0 0 0 1px rgba(14,20,43,.3); }
+.web3-dashboard .card-stack-panel { position:absolute; inset:auto 0 0; height:86px; z-index:10; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; padding:0 20px 16px; background:rgba(15,15,15,.78); border-top:1px solid rgba(255,255,255,.1); backdrop-filter:blur(18px); }
 .web3-dashboard .card-stack-panel p { margin:0; }
 .web3-dashboard .gas-tile { min-height:260px; }
 .web3-dashboard .live-label { color:var(--bento-muted); font:11px var(--bento-mono); }
@@ -65,7 +65,7 @@
 .web3-dashboard .gauge-sub { margin-top:6px; text-align:center; color:var(--bento-muted); font:11px var(--bento-mono); }
 .web3-dashboard .bento-pills { display:inline-flex; gap:2px; border:1px solid var(--bento-border); border-radius:999px; padding:2px; }
 .web3-dashboard .bento-pill { border:0; border-radius:999px; background:transparent; color:var(--bento-muted); padding:5px 9px; font:11px var(--bento-mono); cursor:pointer; }
-.web3-dashboard .bento-pill.active { background:var(--bento-fg); color:#181616; }
+.web3-dashboard .bento-pill.active { background:var(--bento-fg); color:#0e142b; }
 .web3-dashboard .chart-tile { min-height:390px; }
 .web3-dashboard .chart-stats { display:flex; flex-wrap:wrap; align-items:flex-end; gap:28px; }
 .web3-dashboard .chart-stat-label { display:flex; align-items:center; gap:7px; color:var(--bento-muted); font-size:12px; }

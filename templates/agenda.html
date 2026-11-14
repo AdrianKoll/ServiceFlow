@@ -55,7 +55,7 @@
             <span>🕐 {{ event.start_date.strftime('%H:%M') }}{% if event.end_date %} – {{ event.end_date.strftime('%H:%M') }}{% endif %}</span>
             {% if event.location %}<span>📍 {{ event.location }}</span>{% endif %}
             {% if event.user %}<span>👤 {{ event.user.name }}</span>{% endif %}
-            <span class="badge badge-{{ event.type }}" style="background:rgba(110,86,207,0.1);color:var(--primary);border-color:rgba(110,86,207,0.2)">{{ event_type_pt.get(event.type, event.type) }}</span>
+            <span class="badge badge-{{ event.type }}" style="background:rgba(46,103,255,0.1);color:var(--primary);border-color:rgba(46,103,255,0.2)">{{ event_type_pt.get(event.type, event.type) }}</span>
           </div>
         </div>
         <form id="del-evt-{{ event.id }}" action="{{ url_for('agenda.evento_excluir', id=event.id) }}" method="post">

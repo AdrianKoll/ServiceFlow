@@ -48,8 +48,8 @@
 .event-date-col {
   text-align: center;
   min-width: 44px;
-  background: rgba(110, 86, 207, 0.1);
-  border: 1px solid rgba(110, 86, 207, 0.2);
+  background: rgba(46, 103, 255, 0.1);
+  border: 1px solid rgba(46, 103, 255, 0.2);
   border-radius: var(--radius);
   padding: 6px 8px;
 }

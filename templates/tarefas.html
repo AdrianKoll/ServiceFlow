@@ -14,10 +14,10 @@
 
 <div class="kanban">
   {% set cols = [
-    ('todo',       'A Fazer',      '#7d8590', None,          'in_progress'),
-    ('in_progress','Em Andamento', '#58a6ff', 'todo',        'review'),
+    ('todo',       'A Fazer',      '#7b7e8c', None,          'in_progress'),
+    ('in_progress','Em Andamento', '#2e67ff', 'todo',        'review'),
     ('review',     'Revisão',      '#2e67ff', 'in_progress', 'done'),
-    ('done',       'Concluído',    '#3fb950', 'review',      None),
+    ('done',       'Concluído',    '#00eeba', 'review',      None),
   ] %}
   {% for status_key, col_label, col_color, prev_status, next_status in cols %}
   <div class="kanban-col">

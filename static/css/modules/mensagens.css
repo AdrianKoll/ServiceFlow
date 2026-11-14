@@ -254,7 +254,7 @@
 }
 .msg-action-danger:hover {
   color: var(--danger);
-  background: rgba(248, 81, 73, 0.08);
+  background: rgba(255, 40, 34, 0.08);
 }
 
 /* ──────────────────────────────────────────
@@ -347,7 +347,7 @@
   color: var(--text);
   font-size: 13px;
   resize: none;
-  box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.15);
+  box-shadow: 0 0 0 3px rgba(46, 103, 255, 0.15);
 }
 .msg-edit-input:focus {
   outline: none;
@@ -451,11 +451,11 @@
 .quick-select-btn:hover {
   border-color: var(--primary);
   color: var(--primary);
-  background: rgba(110, 86, 207, 0.06);
+  background: rgba(46, 103, 255, 0.06);
 }
 .quick-select-all {
-  background: rgba(110, 86, 207, 0.08);
-  border-color: rgba(110, 86, 207, 0.3);
+  background: rgba(46, 103, 255, 0.08);
+  border-color: rgba(46, 103, 255, 0.3);
   color: var(--primary);
 }
 .quick-select-count {
@@ -524,7 +524,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(110, 86, 207, 0.15);
+  background: rgba(46, 103, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -611,7 +611,7 @@
   height: 7px;
   border-radius: 999px;
   background: var(--primary);
-  box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.12);
+  box-shadow: 0 0 0 3px rgba(46, 103, 255, 0.12);
 }
 .stat-dot-blue {
   background: #00cdcc;
